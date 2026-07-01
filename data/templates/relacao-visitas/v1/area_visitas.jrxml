@@ -87,11 +87,6 @@
 	<parameter name="EMPRESA_EMAIL" class="java.lang.String">
 		<defaultValueExpression><![CDATA["projetos@agrotechcredito.com.br"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="totalizador_quantidade" class="java.lang.Long"/>
-	<parameter name="totalizador_total_visita" class="java.math.BigDecimal"/>
-	<parameter name="totalizador_total_adicional" class="java.math.BigDecimal"/>
-	<parameter name="totalizador_valor_medio" class="java.math.BigDecimal"/>
-	<parameter name="totalizador_valor_medioadicional" class="java.math.BigDecimal"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -103,10 +98,10 @@
 	<field name="dt_visita" class="java.sql.Date"/>
 	<field name="tp_statusvisita" class="java.lang.String"/>
 	<field name="quantidade" class="java.lang.Long"/>
-	<field name="total_visita" class="java.math.BigDecimal"/>
-	<field name="total_adicional" class="java.math.BigDecimal"/>
-	<field name="valor_medio" class="java.math.BigDecimal"/>
-	<field name="valor_medioadicional" class="java.math.BigDecimal"/>
+	<field name="total_visita" class="java.lang.Double"/>
+	<field name="total_adicional" class="java.lang.Double"/>
+	<field name="valor_medio" class="java.lang.Double"/>
+	<field name="valor_medioadicional" class="java.lang.Double"/>
 	<variable name="SEQ" class="java.lang.Integer" calculation="Count">
 		<variableExpression><![CDATA[1]]></variableExpression>
 	</variable>
@@ -300,6 +295,7 @@
 	</columnHeader>
 	<detail>
 		<band height="14">
+			<printWhenExpression><![CDATA[$F{nm_cliente} != null]]></printWhenExpression>
 			<textField>
 				<reportElement style="ContabilDetailZebra" x="0" y="0" width="28" height="14" uuid="57c37ade-9540-4481-a9aa-b552bfa0ad12"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
@@ -400,7 +396,7 @@
 				</textElement>
 				<text><![CDATA[Quantidade de registros:]]></text>
 			</staticText>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement style="ContabilTextoNegrito" x="120" y="14" width="60" height="14" uuid="7e879b5b-b10e-4be8-b095-e52ebc683bbf"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{quantidade}]]></textFieldExpression>
@@ -410,7 +406,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<text><![CDATA[Total visitas:]]></text>
 			</staticText>
-			<textField pattern="#,##0.00">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
 				<reportElement style="ContabilMonetario" x="310" y="14" width="110" height="14" uuid="129b6340-eae6-4434-9d58-db3d0b8a9b4b"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<paragraph rightIndent="3"/>
@@ -422,7 +418,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<text><![CDATA[Total adicional:]]></text>
 			</staticText>
-			<textField pattern="#,##0.00">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
 				<reportElement style="ContabilMonetario" x="540" y="14" width="110" height="14" uuid="a2a2a2a2-a2a2-4a2a-8a2a-a2a2a2a2a2a2"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<paragraph rightIndent="3"/>
@@ -436,7 +432,7 @@
 				</textElement>
 				<text><![CDATA[Valor médio visita:]]></text>
 			</staticText>
-			<textField pattern="#,##0.00">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
 				<reportElement style="ContabilMonetario" x="100" y="28" width="100" height="14" uuid="a4a4a4a4-a4a4-4a4a-8a4a-a4a4a4a4a4a4"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<paragraph rightIndent="3"/>
@@ -448,7 +444,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<text><![CDATA[Adicional médio:]]></text>
 			</staticText>
-			<textField pattern="#,##0.00">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
 				<reportElement style="ContabilMonetario" x="650" y="28" width="152" height="14" uuid="a6a6a6a6-a6a6-4a6a-8a6a-a6a6a6a6a6a6"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<paragraph rightIndent="3"/>

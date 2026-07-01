@@ -16,8 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -72,12 +75,16 @@ public class ReportGenerationService {
             );
 
             Map<String, Object> jasperParams = toJasperParameters(filtros, nmSolicitante);
-            jasperParams.putAll(executeAuxiliaryQueries(relatorio, filtros));
+            List<Map<String, Object>> rows = mergeAuxiliaryFieldsIntoRows(
+                    relatorio,
+                    filtros,
+                    queryResult.rows()
+            );
 
             byte[] content = jasperReportService.render(
                     template.getDsCaminho(),
                     jasperParams,
-                    queryResult.rows(),
+                    rows,
                     format
             );
 
@@ -110,13 +117,41 @@ public class ReportGenerationService {
 
     /**
      * Queries ativas com nmQuery diferente de "main" sao executadas e cada coluna
-     * do primeiro registro vira parametro Jasper: {nmQuery}_{nmColuna}.
+     * do primeiro registro e injetada como field em todas as linhas do detalhe
+     * (alias SQL da coluna). Se houver colisao entre queries auxiliares, usa
+     * {nmQuery}_{nmColuna}.
      */
-    private Map<String, Object> executeAuxiliaryQueries(
+    private List<Map<String, Object>> mergeAuxiliaryFieldsIntoRows(
+            ReportDefinitionEntity relatorio,
+            Map<String, Object> filtros,
+            List<Map<String, Object>> mainRows
+    ) {
+        Map<String, Object> auxiliaryFields = collectAuxiliaryFields(relatorio, filtros);
+        List<Map<String, Object>> rows = new ArrayList<>(mainRows);
+
+        if (auxiliaryFields.isEmpty()) {
+            return rows;
+        }
+
+        if (rows.isEmpty()) {
+            rows.add(new LinkedHashMap<>(auxiliaryFields));
+            return rows;
+        }
+
+        List<Map<String, Object>> mergedRows = new ArrayList<>(rows.size());
+        for (Map<String, Object> mainRow : rows) {
+            Map<String, Object> row = new LinkedHashMap<>(mainRow);
+            row.putAll(auxiliaryFields);
+            mergedRows.add(row);
+        }
+        return mergedRows;
+    }
+
+    private Map<String, Object> collectAuxiliaryFields(
             ReportDefinitionEntity relatorio,
             Map<String, Object> filtros
     ) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> fields = new LinkedHashMap<>();
         for (ReportQueryEntity query : relatorio.getQueries()) {
             if (!query.isFlAtivo() || "main".equalsIgnoreCase(query.getNmQuery())) {
                 continue;
@@ -127,14 +162,48 @@ public class ReportGenerationService {
                     filtros
             );
             if (result.rows().isEmpty()) {
+                log.warn("Query auxiliar '{}' nao retornou dados para o relatorio {}", query.getNmQuery(), relatorio.getCdRelatorio());
                 continue;
             }
             String prefix = query.getNmQuery() + "_";
-            result.rows().get(0).forEach((column, value) ->
-                    params.put(prefix + column, value)
-            );
+            result.rows().get(0).forEach((column, value) -> {
+                String fieldName = fields.containsKey(column) ? prefix + column : column;
+                fields.put(fieldName, normalizeAuxiliaryValue(fieldName, value));
+            });
         }
-        return params;
+        if (!fields.isEmpty()) {
+            log.debug("Fields auxiliares do relatorio {}: {}", relatorio.getCdRelatorio(), fields.keySet());
+        }
+        return fields;
+    }
+
+    /**
+     * Garante tipos compativeis com os fields declarados no JRXML (Long / Double).
+     */
+    private Object normalizeAuxiliaryValue(String fieldName, Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (isQuantityField(fieldName)) {
+            if (value instanceof Long longValue) {
+                return longValue;
+            }
+            if (value instanceof Number number) {
+                return number.longValue();
+            }
+            return value;
+        }
+        if (value instanceof Double doubleValue) {
+            return doubleValue;
+        }
+        if (value instanceof Number number) {
+            return number.doubleValue();
+        }
+        return value;
+    }
+
+    private boolean isQuantityField(String fieldName) {
+        return "quantidade".equals(fieldName) || fieldName.endsWith("_quantidade");
     }
 
     private void saveLog(

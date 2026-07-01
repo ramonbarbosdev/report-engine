@@ -120,8 +120,9 @@
       <div class="card">
         <p class="hint">
           Use <code>main</code> para os dados do detalhe. Queries auxiliares (ex.: <code>totalizador</code>)
-          viram parâmetros no JRXML no formato <code>nmQuery_coluna</code> — ex.:
-          <code>totalizador_quantidade</code>.
+          injetam as colunas do primeiro registro como <strong>fields</strong> em cada linha do detalhe
+          (alias SQL da coluna) — ex.: <code>quantidade</code>, <code>total_visita</code>.
+          No JRXML use <code>quantidade</code> no summary.
         </p>
 
         <div class="card-header">
