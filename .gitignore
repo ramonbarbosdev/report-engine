@@ -26,3 +26,4 @@ data/templates/*
 !data/templates/.gitkeep
 !data/templates/exemplo-visitas/
 !data/templates/relacao-visitas/
+!data/templates/comissao-projetista/
