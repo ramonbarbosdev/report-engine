@@ -1,13 +1,24 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReportAdminApi } from '../../services/report-admin.api';
-import { ReportDetail, ReportQuery } from '../../models/report.models';
+import { ReportDetail, ReportFilter, ReportQuery, ReportTemplate } from '../../models/report.models';
+import { SqlEditorComponent } from '../../shared/components/sql-editor/sql-editor.component';
+import { AlertBannerComponent } from '../../shared/components/alert-banner/alert-banner.component';
+
+export type ReportFormTab = 'geral' | 'queries' | 'filtros' | 'templates';
 
 @Component({
   selector: 'app-report-form-page',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterLink,
+    SqlEditorComponent,
+    AlertBannerComponent,
+  ],
   templateUrl: './report-form.page.html',
 })
 export class ReportFormPage implements OnInit {
@@ -21,8 +32,14 @@ export class ReportFormPage implements OnInit {
   detail: ReportDetail | null = null;
   loading = false;
   saving = false;
+  savingQuery = false;
+  savingFilter = false;
+  uploadingTemplate = false;
   message = '';
   error = '';
+  activeTab: ReportFormTab = 'geral';
+  selectedQueryName = '';
+  selectedFilterKey = '';
 
   reportForm = this.fb.group({
     cdRelatorio: ['', [Validators.required]],
@@ -51,6 +68,9 @@ export class ReportFormPage implements OnInit {
   });
 
   selectedTemplateFile: File | null = null;
+  selectedTemplateFileName = '';
+  activateOnUpload = true;
+  templateActionId: number | null = null;
 
   ngOnInit(): void {
     this.cdRelatorio = this.route.snapshot.paramMap.get('code') ?? '';
@@ -60,28 +80,22 @@ export class ReportFormPage implements OnInit {
       this.loading = true;
       this.api.get(this.cdRelatorio).subscribe({
         next: (detail) => {
-          this.detail = detail;
-          this.reportForm.patchValue({
-            cdRelatorio: detail.cdRelatorio,
-            nmRelatorio: detail.nmRelatorio,
-            nmCategoria: detail.nmCategoria ?? '',
-            dsRelatorio: detail.dsRelatorio ?? '',
-            nmDatasource: detail.nmDatasource,
-            dsFormatosSaida: detail.dsFormatosSaida,
-            flAtivo: detail.flAtivo,
-          });
-          const mainQuery = detail.queries.find((q) => q.nmQuery === 'main');
-          if (mainQuery) {
-            this.editQuery(mainQuery);
-          }
+          this.patchDetail(detail);
           this.loading = false;
         },
         error: (err) => {
-          this.error = err?.error?.detail ?? 'Falha ao carregar relatorio';
+          this.error = err?.error?.detail ?? 'Falha ao carregar relatório';
           this.loading = false;
         },
       });
     }
+  }
+
+  setTab(tab: ReportFormTab): void {
+    if (this.isNew && tab !== 'geral') {
+      return;
+    }
+    this.activeTab = tab;
   }
 
   saveReport(): void {
@@ -90,7 +104,7 @@ export class ReportFormPage implements OnInit {
     }
 
     this.saving = true;
-    this.error = '';
+    this.clearAlerts();
     const payload = this.reportForm.getRawValue();
     const request$ = this.isNew
       ? this.api.create(payload as any)
@@ -99,16 +113,16 @@ export class ReportFormPage implements OnInit {
     request$.subscribe({
       next: (detail) => {
         this.saving = false;
-        this.message = 'Relatorio salvo com sucesso';
+        this.message = 'Relatório salvo com sucesso';
         if (this.isNew) {
           this.router.navigate(['/reports', detail.cdRelatorio]);
         } else {
-          this.detail = detail;
+          this.patchDetail(detail);
         }
       },
       error: (err) => {
         this.saving = false;
-        this.error = err?.error?.detail ?? 'Falha ao salvar relatorio';
+        this.error = err?.error?.detail ?? 'Falha ao salvar relatório';
       },
     });
   }
@@ -118,24 +132,29 @@ export class ReportFormPage implements OnInit {
       return;
     }
 
+    this.savingQuery = true;
+    this.clearAlerts();
     this.api.upsertQuery(this.cdRelatorio, this.queryForm.getRawValue() as any).subscribe({
       next: (detail) => {
-        this.detail = detail;
+        this.savingQuery = false;
         this.message = 'Query salva com sucesso';
-        const saved = detail.queries.find(
-          (q) => q.nmQuery === this.queryForm.getRawValue().nmQuery
-        );
-        if (saved) {
-          this.editQuery(saved);
-        }
+        this.patchDetail(detail);
+        const nmQuery = this.queryForm.getRawValue().nmQuery!;
+        this.selectQuery(nmQuery);
       },
       error: (err) => {
+        this.savingQuery = false;
         this.error = err?.error?.detail ?? 'Falha ao salvar query';
       },
     });
   }
 
-  editQuery(query: ReportQuery): void {
+  selectQuery(nmQuery: string): void {
+    const query = this.detail?.queries.find((q) => q.nmQuery === nmQuery);
+    if (!query) {
+      return;
+    }
+    this.selectedQueryName = nmQuery;
     this.queryForm.patchValue({
       nmQuery: query.nmQuery,
       dsSql: query.dsSql,
@@ -144,6 +163,7 @@ export class ReportFormPage implements OnInit {
   }
 
   newQuery(): void {
+    this.selectedQueryName = '';
     this.queryForm.reset({
       nmQuery: '',
       dsSql: '',
@@ -156,25 +176,52 @@ export class ReportFormPage implements OnInit {
       return;
     }
 
+    this.savingFilter = true;
+    this.clearAlerts();
     this.api.upsertFilter(this.cdRelatorio, this.filterForm.getRawValue() as any).subscribe({
       next: (detail) => {
-        this.detail = detail;
+        this.savingFilter = false;
         this.message = 'Filtro salvo com sucesso';
-        this.filterForm.reset({
-          tpFiltro: 'DATE',
-          flObrigatorio: false,
-          nuOrdem: 0,
-        });
+        this.patchDetail(detail);
+        this.newFilter();
       },
       error: (err) => {
+        this.savingFilter = false;
         this.error = err?.error?.detail ?? 'Falha ao salvar filtro';
       },
+    });
+  }
+
+  selectFilter(filtro: ReportFilter): void {
+    this.selectedFilterKey = filtro.nmChave;
+    this.filterForm.patchValue({
+      nmChave: filtro.nmChave,
+      dsRotulo: filtro.dsRotulo,
+      tpFiltro: filtro.tpFiltro,
+      flObrigatorio: filtro.flObrigatorio,
+      dsValorPadrao: filtro.dsValorPadrao ?? '',
+      dsQueryOpcoes: filtro.dsQueryOpcoes ?? '',
+      nuOrdem: filtro.nuOrdem,
+    });
+  }
+
+  newFilter(): void {
+    this.selectedFilterKey = '';
+    this.filterForm.reset({
+      nmChave: '',
+      dsRotulo: '',
+      tpFiltro: 'DATE',
+      flObrigatorio: false,
+      dsValorPadrao: '',
+      dsQueryOpcoes: '',
+      nuOrdem: (this.detail?.filtros.length ?? 0) + 1,
     });
   }
 
   onTemplateSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.selectedTemplateFile = input.files?.[0] ?? null;
+    this.selectedTemplateFileName = this.selectedTemplateFile?.name ?? '';
   }
 
   uploadTemplate(): void {
@@ -182,15 +229,107 @@ export class ReportFormPage implements OnInit {
       return;
     }
 
-    this.api.uploadTemplate(this.cdRelatorio, this.selectedTemplateFile, true).subscribe({
+    this.uploadingTemplate = true;
+    this.clearAlerts();
+    this.api.uploadTemplate(this.cdRelatorio, this.selectedTemplateFile, this.activateOnUpload).subscribe({
       next: (detail) => {
-        this.detail = detail;
-        this.message = 'Template enviado com sucesso';
+        this.uploadingTemplate = false;
+        this.message = this.activateOnUpload
+          ? 'Template enviado e ativado com sucesso'
+          : 'Template enviado (versão inativa). Ative quando estiver pronto.';
+        this.patchDetail(detail);
         this.selectedTemplateFile = null;
+        this.selectedTemplateFileName = '';
       },
       error: (err) => {
+        this.uploadingTemplate = false;
         this.error = err?.error?.detail ?? 'Falha ao enviar template';
       },
     });
+  }
+
+  activateTemplate(idTemplate: number): void {
+    if (this.isNew) {
+      return;
+    }
+    this.templateActionId = idTemplate;
+    this.clearAlerts();
+    this.api.activateTemplate(this.cdRelatorio, idTemplate).subscribe({
+      next: (detail) => {
+        this.templateActionId = null;
+        this.message = 'Template ativado com sucesso';
+        this.patchDetail(detail);
+      },
+      error: (err) => {
+        this.templateActionId = null;
+        this.error = err?.error?.detail ?? 'Falha ao ativar template';
+      },
+    });
+  }
+
+  deleteTemplate(idTemplate: number, nmArquivo: string, nuVersao: number): void {
+    if (this.isNew) {
+      return;
+    }
+    const ok = confirm(
+      `Excluir a versão v${nuVersao} (${nmArquivo})?\n\nEsta ação não pode ser desfeita.`
+    );
+    if (!ok) {
+      return;
+    }
+    this.templateActionId = idTemplate;
+    this.clearAlerts();
+    this.api.deleteTemplate(this.cdRelatorio, idTemplate).subscribe({
+      next: (detail) => {
+        this.templateActionId = null;
+        this.message = 'Template excluído com sucesso';
+        this.patchDetail(detail);
+      },
+      error: (err) => {
+        this.templateActionId = null;
+        this.error = err?.error?.detail ?? 'Falha ao excluir template';
+      },
+    });
+  }
+
+  get sortedQueries(): ReportQuery[] {
+    return [...(this.detail?.queries ?? [])].sort((a, b) => a.nmQuery.localeCompare(b.nmQuery));
+  }
+
+  get sortedTemplates(): ReportTemplate[] {
+    return [...(this.detail?.templates ?? [])].sort((a, b) => b.nuVersao - a.nuVersao);
+  }
+
+  get sortedFilters(): ReportFilter[] {
+    return [...(this.detail?.filtros ?? [])].sort((a, b) => a.nuOrdem - b.nuOrdem);
+  }
+
+  isSelectFilter(): boolean {
+    return this.filterForm.getRawValue().tpFiltro === 'SELECT';
+  }
+
+  private patchDetail(detail: ReportDetail): void {
+    this.detail = detail;
+    this.reportForm.patchValue({
+      cdRelatorio: detail.cdRelatorio,
+      nmRelatorio: detail.nmRelatorio,
+      nmCategoria: detail.nmCategoria ?? '',
+      dsRelatorio: detail.dsRelatorio ?? '',
+      nmDatasource: detail.nmDatasource,
+      dsFormatosSaida: detail.dsFormatosSaida,
+      flAtivo: detail.flAtivo,
+    });
+
+    const mainQuery = detail.queries.find((q) => q.nmQuery === 'main');
+    if (mainQuery) {
+      this.selectQuery(mainQuery.nmQuery);
+    } else if (detail.queries.length > 0) {
+      this.selectQuery(detail.queries[0].nmQuery);
+    }
+  }
+
+  private clearAlerts(): void {
+    this.message = '';
+    this.error = '';
   }
 }

@@ -49,6 +49,26 @@ public class ReportTemplateStorageService {
         }
     }
 
+    public void delete(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            return;
+        }
+        try {
+            Path file = resolve(relativePath);
+            Files.deleteIfExists(file);
+            Path versionDir = file.getParent();
+            if (versionDir != null && Files.isDirectory(versionDir)) {
+                try (var entries = Files.list(versionDir)) {
+                    if (entries.findAny().isEmpty()) {
+                        Files.deleteIfExists(versionDir);
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            log.warn("Nao foi possivel remover arquivo de template {}: {}", relativePath, ex.getMessage());
+        }
+    }
+
     private Path locateBasePath(String configured) {
         Set<Path> candidates = new LinkedHashSet<>();
         Path configuredPath = Path.of(configured);

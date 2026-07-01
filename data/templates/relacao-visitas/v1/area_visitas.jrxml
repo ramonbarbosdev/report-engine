@@ -50,13 +50,13 @@
 	<style name="ContabilDetailZebra" style="ContabilDetail">
 		<conditionalStyle>
 			<conditionExpression><![CDATA[$V{SEQ} % 2 == 0]]></conditionExpression>
-			<style style="ContabilDetailAlt"/>
+			<style/>
 		</conditionalStyle>
 	</style>
 	<style name="ContabilMonetarioZebra" style="ContabilMonetario">
 		<conditionalStyle>
 			<conditionExpression><![CDATA[$V{SEQ} % 2 == 0]]></conditionExpression>
-			<style style="ContabilMonetarioAlt"/>
+			<style/>
 		</conditionalStyle>
 	</style>
 	<parameter name="dataInicial" class="java.lang.String"/>
@@ -88,10 +88,13 @@
 		<defaultValueExpression><![CDATA["projetos@agrotechcredito.com.br"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="totalizador_quantidade" class="java.lang.Long"/>
-	<parameter name="totalizador_total_visita" class="java.lang.Double"/>
-	<parameter name="totalizador_total_adicional" class="java.lang.Double"/>
-	<parameter name="totalizador_valor_medio" class="java.lang.Double"/>
-	<parameter name="totalizador_valor_medioadicional" class="java.lang.Double"/>
+	<parameter name="totalizador_total_visita" class="java.math.BigDecimal"/>
+	<parameter name="totalizador_total_adicional" class="java.math.BigDecimal"/>
+	<parameter name="totalizador_valor_medio" class="java.math.BigDecimal"/>
+	<parameter name="totalizador_valor_medioadicional" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
 	<field name="nm_cliente" class="java.lang.String"/>
 	<field name="nm_propriedadecliente" class="java.lang.String"/>
 	<field name="nm_tecnico" class="java.lang.String"/>
@@ -99,6 +102,11 @@
 	<field name="vl_adicionalvisita" class="java.lang.Double"/>
 	<field name="dt_visita" class="java.sql.Date"/>
 	<field name="tp_statusvisita" class="java.lang.String"/>
+	<field name="quantidade" class="java.lang.Long"/>
+	<field name="total_visita" class="java.math.BigDecimal"/>
+	<field name="total_adicional" class="java.math.BigDecimal"/>
+	<field name="valor_medio" class="java.math.BigDecimal"/>
+	<field name="valor_medioadicional" class="java.math.BigDecimal"/>
 	<variable name="SEQ" class="java.lang.Integer" calculation="Count">
 		<variableExpression><![CDATA[1]]></variableExpression>
 	</variable>
@@ -395,7 +403,7 @@
 			<textField>
 				<reportElement style="ContabilTextoNegrito" x="120" y="14" width="60" height="14" uuid="7e879b5b-b10e-4be8-b095-e52ebc683bbf"/>
 				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$P{totalizador_quantidade}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{quantidade}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement style="ContabilLabel" x="220" y="14" width="90" height="14" uuid="deebffa4-5307-4ed0-84e2-632ac5aa020c"/>
@@ -407,7 +415,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<paragraph rightIndent="3"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{totalizador_total_visita}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{total_visita}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement style="ContabilLabel" x="440" y="14" width="100" height="14" uuid="a1a1a1a1-a1a1-4a1a-8a1a-a1a1a1a1a1a1"/>
@@ -419,7 +427,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<paragraph rightIndent="3"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{totalizador_total_adicional}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{total_adicional}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement style="ContabilLabel" x="0" y="28" width="100" height="14" uuid="a3a3a3a3-a3a3-4a3a-8a3a-a3a3a3a3a3a3"/>
@@ -433,7 +441,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<paragraph rightIndent="3"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{totalizador_valor_medio}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{valor_medio}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement style="ContabilLabel" x="540" y="28" width="110" height="14" uuid="a5a5a5a5-a5a5-4a5a-8a5a-a5a5a5a5a5a5"/>
@@ -445,7 +453,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<paragraph rightIndent="3"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{totalizador_valor_medioadicional}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{valor_medioadicional}]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

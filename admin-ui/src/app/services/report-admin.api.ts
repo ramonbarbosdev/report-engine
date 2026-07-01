@@ -51,4 +51,17 @@ export class ReportAdminApi {
       form
     );
   }
+
+  activateTemplate(cdRelatorio: string, idTemplate: number) {
+    return this.http.put<ReportDetail>(
+      `${this.baseUrl}/${cdRelatorio}/templates/${idTemplate}/activate`,
+      {}
+    );
+  }
+
+  deleteTemplate(cdRelatorio: string, idTemplate: number) {
+    return this.http.delete<ReportDetail>(
+      `${this.baseUrl}/${cdRelatorio}/templates/${idTemplate}`
+    );
+  }
 }

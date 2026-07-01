@@ -11,15 +11,18 @@ import br.com.reportengine.domain.repository.ReportExecutionLogRepository;
 import br.com.reportengine.domain.service.ReportDefinitionLoader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReportGenerationService {
 
     private final ReportDefinitionLoader reportDefinitionLoader;
@@ -51,8 +54,15 @@ public class ReportGenerationService {
 
         ReportTemplateEntity template = relatorio.getTemplates().stream()
                 .filter(ReportTemplateEntity::isFlAtivo)
-                .findFirst()
+                .max(Comparator.comparing(ReportTemplateEntity::getNuVersao))
                 .orElseThrow(() -> ReportEngineException.badRequest("Template ativo nao configurado"));
+
+        log.info(
+                "Gerando relatorio {} usando template v{} ({})",
+                cdRelatorio,
+                template.getNuVersao(),
+                template.getDsCaminho()
+        );
 
         try {
             QueryExecutorService.QueryExecutionResult queryResult = queryExecutorService.execute(

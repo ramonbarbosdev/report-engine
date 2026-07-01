@@ -63,4 +63,20 @@ public class ReportAdminController {
     ) {
         return adminService.uploadTemplate(cdRelatorio, file, flAtivar);
     }
+
+    @PutMapping("/{cdRelatorio}/templates/{idTemplate}/activate")
+    public ReportAdminDetailDTO activateTemplate(
+            @PathVariable String cdRelatorio,
+            @PathVariable Long idTemplate
+    ) {
+        return adminService.activateTemplate(cdRelatorio, idTemplate);
+    }
+
+    @DeleteMapping("/{cdRelatorio}/templates/{idTemplate}")
+    public ReportAdminDetailDTO deleteTemplate(
+            @PathVariable String cdRelatorio,
+            @PathVariable Long idTemplate
+    ) {
+        return adminService.deleteTemplate(cdRelatorio, idTemplate);
+    }
 }

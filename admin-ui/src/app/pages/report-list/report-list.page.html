@@ -1,42 +1,90 @@
-<div class="card">
-  <h2>Catalogo de relatorios</h2>
-
-  @if (loading) {
-    <p>Carregando...</p>
-  } @else if (error) {
-    <p class="error">{{ error }}</p>
-  } @else if (reports.length === 0) {
-    <p>Nenhum relatorio cadastrado.</p>
-  } @else {
-    <table>
-      <thead>
-        <tr>
-          <th>Codigo</th>
-          <th>Nome</th>
-          <th>Categoria</th>
-          <th>Versao</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (report of reports; track report.cdRelatorio) {
-          <tr>
-            <td>{{ report.cdRelatorio }}</td>
-            <td>{{ report.nmRelatorio }}</td>
-            <td>{{ report.nmCategoria || '-' }}</td>
-            <td>{{ report.nuVersao }}</td>
-            <td>
-              <span class="badge" [class.ok]="report.flAtivo" [class.off]="!report.flAtivo">
-                {{ report.flAtivo ? 'Ativo' : 'Inativo' }}
-              </span>
-            </td>
-            <td>
-              <a [routerLink]="['/reports', report.cdRelatorio]">Editar</a>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  }
+<div class="page-header">
+  <div>
+    <h2>Relatórios</h2>
+    <p>Catálogo de relatórios configurados no motor Jasper</p>
+  </div>
+  <div class="page-actions">
+    <a routerLink="/reports/new" class="btn btn-primary">Novo relatório</a>
+  </div>
 </div>
+
+@if (loading) {
+  <div class="card loading-state">
+    <span class="spinner"></span>
+    <p style="margin-top: 12px">Carregando relatórios...</p>
+  </div>
+} @else if (error) {
+  <div class="alert alert-error">
+    <span class="alert-icon">!</span>
+    <span class="alert-text">{{ error }}</span>
+  </div>
+} @else {
+  <div class="card">
+    <div class="card-header">
+      <h3>{{ filtered.length }} relatório(s)</h3>
+      <div class="search-bar">
+        <input
+          type="search"
+          placeholder="Buscar por código, nome ou categoria..."
+          [(ngModel)]="search"
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+    </div>
+
+    @if (filtered.length === 0) {
+      <div class="empty-state">
+        <h3>Nenhum relatório encontrado</h3>
+        <p>
+          @if (search) {
+            Tente outro termo de busca ou
+            <a routerLink="/reports/new">crie um novo relatório</a>.
+          } @else {
+            <a routerLink="/reports/new">Crie o primeiro relatório</a> para começar.
+          }
+        </p>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Versão</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (report of filtered; track report.cdRelatorio) {
+              <tr>
+                <td><code>{{ report.cdRelatorio }}</code></td>
+                <td>{{ report.nmRelatorio }}</td>
+                <td>
+                  @if (report.nmCategoria) {
+                    <span class="badge neutral">{{ report.nmCategoria }}</span>
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>v{{ report.nuVersao }}</td>
+                <td>
+                  <span class="badge" [class.ok]="report.flAtivo" [class.off]="!report.flAtivo">
+                    {{ report.flAtivo ? 'Ativo' : 'Inativo' }}
+                  </span>
+                </td>
+                <td>
+                  <a [routerLink]="['/reports', report.cdRelatorio]" class="btn btn-ghost btn-sm">
+                    Editar →
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

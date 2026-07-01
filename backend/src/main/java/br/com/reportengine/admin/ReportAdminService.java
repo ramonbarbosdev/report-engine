@@ -126,10 +126,67 @@ public class ReportAdminService {
         template.setDsCaminho(dsCaminho);
         template.setFlAtivo(flAtivar);
         relatorio.getTemplates().add(template);
-        relatorio.setNuVersao(nextVersion);
+        if (flAtivar) {
+            relatorio.setNuVersao(nextVersion);
+        }
 
+        evictAllTemplateCaches(relatorio);
+        return toDetail(reportRepository.save(relatorio));
+    }
+
+    @Transactional
+    public ReportAdminDetailDTO activateTemplate(String cdRelatorio, Long idTemplate) {
+        ReportDefinitionEntity relatorio = findByCdRelatorioOrThrow(cdRelatorio);
+        ReportTemplateEntity template = findTemplateOrThrow(relatorio, idTemplate);
+        relatorio.getTemplates().forEach(t -> t.setFlAtivo(false));
+        template.setFlAtivo(true);
+        relatorio.setNuVersao(template.getNuVersao());
+        evictAllTemplateCaches(relatorio);
+        return toDetail(reportRepository.save(relatorio));
+    }
+
+    @Transactional
+    public ReportAdminDetailDTO deleteTemplate(String cdRelatorio, Long idTemplate) {
+        ReportDefinitionEntity relatorio = findByCdRelatorioOrThrow(cdRelatorio);
+        if (relatorio.getTemplates().size() <= 1) {
+            throw ReportEngineException.badRequest(
+                    "Nao e possivel excluir o unico template. Envie outra versao antes ou substitua o arquivo."
+            );
+        }
+
+        ReportTemplateEntity template = findTemplateOrThrow(relatorio, idTemplate);
+        boolean wasActive = template.isFlAtivo();
+        String dsCaminho = template.getDsCaminho();
+
+        relatorio.getTemplates().removeIf(t -> t.getIdRelatoriotemplate().equals(idTemplate));
+
+        if (wasActive) {
+            ReportTemplateEntity replacement = relatorio.getTemplates().stream()
+                    .max(Comparator.comparing(ReportTemplateEntity::getNuVersao))
+                    .orElseThrow();
+            replacement.setFlAtivo(true);
+            relatorio.setNuVersao(replacement.getNuVersao());
+        }
+
+        templateStorage.delete(dsCaminho);
+        evictAllTemplateCaches(relatorio);
         jasperReportService.evictCache(dsCaminho);
         return toDetail(reportRepository.save(relatorio));
+    }
+
+    private void evictAllTemplateCaches(ReportDefinitionEntity relatorio) {
+        jasperReportService.evictAll(
+                relatorio.getTemplates().stream()
+                        .map(ReportTemplateEntity::getDsCaminho)
+                        .toList()
+        );
+    }
+
+    private ReportTemplateEntity findTemplateOrThrow(ReportDefinitionEntity relatorio, Long idTemplate) {
+        return relatorio.getTemplates().stream()
+                .filter(t -> t.getIdRelatoriotemplate().equals(idTemplate))
+                .findFirst()
+                .orElseThrow(() -> ReportEngineException.notFound("Template nao encontrado: " + idTemplate));
     }
 
     private ReportDefinitionEntity findByCdRelatorioOrThrow(String cdRelatorio) {

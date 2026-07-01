@@ -1,219 +1,394 @@
-<h2>{{ isNew ? 'Novo relatorio' : 'Editar relatorio' }}</h2>
+<div class="page-header">
+  <div>
+    <h2>{{ isNew ? 'Novo relatório' : detail?.nmRelatorio ?? cdRelatorio }}</h2>
+    <p>
+      @if (isNew) {
+        Cadastre um novo relatório no motor
+      } @else {
+        <code>{{ cdRelatorio }}</code>
+        @if (detail?.dtAlteracao) {
+          · atualizado em {{ detail!.dtAlteracao | date: 'short' }}
+        }
+      }
+    </p>
+  </div>
+  <div class="page-actions">
+    <a routerLink="/reports" class="btn btn-secondary">← Voltar</a>
+  </div>
+</div>
 
 @if (loading) {
-  <p>Carregando...</p>
+  <div class="card loading-state">
+    <span class="spinner"></span>
+    <p style="margin-top: 12px">Carregando relatório...</p>
+  </div>
 } @else {
-  @if (message) {
-    <p>{{ message }}</p>
-  }
-  @if (error) {
-    <p class="error">{{ error }}</p>
-  }
+  <app-alert-banner [message]="message" type="success" />
+  <app-alert-banner [message]="error" type="error" />
 
-  <div class="card">
-    <h3>Dados gerais</h3>
-    <form [formGroup]="reportForm" (ngSubmit)="saveReport()" class="grid-2">
-      <div>
-        <label for="cdRelatorio">Codigo</label>
-        <input id="cdRelatorio" formControlName="cdRelatorio" [readonly]="!isNew" />
-      </div>
-      <div>
-        <label for="nmRelatorio">Nome</label>
-        <input id="nmRelatorio" formControlName="nmRelatorio" />
-      </div>
-      <div>
-        <label for="nmCategoria">Categoria</label>
-        <input id="nmCategoria" formControlName="nmCategoria" />
-      </div>
-      <div>
-        <label for="nmDatasource">Datasource</label>
-        <input id="nmDatasource" formControlName="nmDatasource" />
-      </div>
-      <div>
-        <label for="dsFormatosSaida">Formatos</label>
-        <input id="dsFormatosSaida" formControlName="dsFormatosSaida" />
-      </div>
-      <div>
-        <label for="flAtivo">Ativo</label>
-        <select id="flAtivo" formControlName="flAtivo">
-          <option [ngValue]="true">Sim</option>
-          <option [ngValue]="false">Nao</option>
-        </select>
-      </div>
-      <div style="grid-column: 1 / -1">
-        <label for="dsRelatorio">Descricao</label>
-        <textarea id="dsRelatorio" rows="3" formControlName="dsRelatorio"></textarea>
-      </div>
-      <div>
-        <button type="submit" [disabled]="saving || reportForm.invalid">
-          {{ saving ? 'Salvando...' : 'Salvar relatorio' }}
-        </button>
-      </div>
-    </form>
+  <div class="tabs">
+    <button type="button" class="tab" [class.active]="activeTab === 'geral'" (click)="setTab('geral')">
+      Dados gerais
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'queries'"
+      [disabled]="isNew"
+      (click)="setTab('queries')"
+    >
+      Queries SQL
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'filtros'"
+      [disabled]="isNew"
+      (click)="setTab('filtros')"
+    >
+      Filtros
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'templates'"
+      [disabled]="isNew"
+      (click)="setTab('templates')"
+    >
+      Templates
+    </button>
   </div>
 
-  @if (!isNew) {
-    <div class="card">
-      <h3>Queries SQL</h3>
-      <p class="hint">
-        Use <code>main</code> para o detalhe. Outras queries (ex.: <code>totalizador</code>) viram
-        parâmetros no JRXML: <code>{nmQuery}_{coluna}</code> (ex.: <code>totalizador_quantidade</code>).
-      </p>
-
-      @if (detail?.queries?.length) {
-        <table style="margin-bottom: 16px">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Ativa</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (query of detail!.queries; track query.nmQuery) {
-              <tr>
-                <td>{{ query.nmQuery }}</td>
-                <td>{{ query.flAtivo ? 'Sim' : 'Nao' }}</td>
-                <td>
-                  <button type="button" (click)="editQuery(query)">Editar</button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
-
-      <div style="margin-bottom: 12px">
-        <button type="button" (click)="newQuery()">Nova query</button>
-      </div>
-
-      <form [formGroup]="queryForm" (ngSubmit)="saveQuery()">
-        <div class="grid-2">
-          <div>
-            <label for="nmQuery">Nome</label>
-            <input id="nmQuery" formControlName="nmQuery" placeholder="main, totalizador..." />
-          </div>
-          <div>
-            <label for="flAtivoQuery">Ativa</label>
-            <select id="flAtivoQuery" formControlName="flAtivo">
-              <option [ngValue]="true">Sim</option>
-              <option [ngValue]="false">Nao</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-top: 12px">
-          <label for="dsSql">SQL</label>
-          <textarea id="dsSql" rows="10" formControlName="dsSql"></textarea>
-        </div>
-        <div style="margin-top: 12px">
-          <button type="submit" [disabled]="queryForm.invalid">Salvar query</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="card">
-      <h3>Filtros</h3>
-      <form [formGroup]="filterForm" (ngSubmit)="saveFilter()" class="grid-2">
-        <div>
-          <label for="nmChave">Chave</label>
-          <input id="nmChave" formControlName="nmChave" />
-        </div>
-        <div>
-          <label for="dsRotulo">Rotulo</label>
-          <input id="dsRotulo" formControlName="dsRotulo" />
-        </div>
-        <div>
-          <label for="tpFiltro">Tipo</label>
-          <select id="tpFiltro" formControlName="tpFiltro">
-            <option value="TEXT">TEXT</option>
-            <option value="NUMBER">NUMBER</option>
-            <option value="DATE">DATE</option>
-            <option value="DATETIME">DATETIME</option>
-            <option value="BOOLEAN">BOOLEAN</option>
-            <option value="SELECT">SELECT</option>
-          </select>
-        </div>
-        <div>
-          <label for="nuOrdem">Ordem</label>
-          <input id="nuOrdem" type="number" formControlName="nuOrdem" />
-        </div>
-        <div>
-          <label for="flObrigatorio">Obrigatorio</label>
-          <select id="flObrigatorio" formControlName="flObrigatorio">
-            <option [ngValue]="true">Sim</option>
-            <option [ngValue]="false">Nao</option>
-          </select>
-        </div>
-        <div>
-          <label for="dsValorPadrao">Valor padrao</label>
-          <input id="dsValorPadrao" formControlName="dsValorPadrao" />
-        </div>
-        <div style="grid-column: 1 / -1">
-          <label for="dsQueryOpcoes">Query de opcoes (SELECT)</label>
-          <textarea id="dsQueryOpcoes" rows="3" formControlName="dsQueryOpcoes"></textarea>
-        </div>
-        <div>
-          <button type="submit" [disabled]="filterForm.invalid">Adicionar/atualizar filtro</button>
-        </div>
-      </form>
-
-      @if (detail?.filtros?.length) {
-        <table style="margin-top: 16px">
-          <thead>
-            <tr>
-              <th>Chave</th>
-              <th>Rotulo</th>
-              <th>Tipo</th>
-              <th>Obrigatorio</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (filtro of detail!.filtros; track filtro.nmChave) {
-              <tr>
-                <td>{{ filtro.nmChave }}</td>
-                <td>{{ filtro.dsRotulo }}</td>
-                <td>{{ filtro.tpFiltro }}</td>
-                <td>{{ filtro.flObrigatorio ? 'Sim' : 'Nao' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
-    </div>
-
-    <div class="card">
-      <h3>Templates JRXML</h3>
-      <input type="file" accept=".jrxml,.jasper" (change)="onTemplateSelected($event)" />
-      <div style="margin-top: 12px">
-        <button type="button" (click)="uploadTemplate()" [disabled]="!selectedTemplateFile">
-          Enviar template
-        </button>
-      </div>
-
-      @if (detail?.templates?.length) {
-        <table style="margin-top: 16px">
-          <thead>
-            <tr>
-              <th>Versao</th>
-              <th>Arquivo</th>
-              <th>Ativo</th>
-              <th>Criado em</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (template of detail!.templates; track template.idRelatoriotemplate) {
-              <tr>
-                <td>{{ template.nuVersao }}</td>
-                <td>{{ template.nmArquivo }}</td>
-                <td>{{ template.flAtivo ? 'Sim' : 'Nao' }}</td>
-                <td>{{ template.dtCadastro | date: 'short' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
+  @if (isNew && activeTab !== 'geral') {
+    <div class="alert alert-info">
+      <span class="alert-icon">i</span>
+      <span class="alert-text">Salve o relatório na aba Dados gerais antes de configurar queries, filtros e templates.</span>
     </div>
   }
 
-  <p><a routerLink="/reports">Voltar para lista</a></p>
+  <!-- ABA: GERAL -->
+  @if (activeTab === 'geral') {
+    <div class="tab-panel card">
+      <form [formGroup]="reportForm" (ngSubmit)="saveReport()">
+        <div class="grid-2">
+          <div class="field">
+            <label for="cdRelatorio">Código</label>
+            <input id="cdRelatorio" formControlName="cdRelatorio" [readonly]="!isNew" placeholder="ex: relacao-visitas" />
+            <span class="field-hint">Identificador único usado na API</span>
+          </div>
+          <div class="field">
+            <label for="nmRelatorio">Nome</label>
+            <input id="nmRelatorio" formControlName="nmRelatorio" placeholder="Relação de Visitas" />
+          </div>
+          <div class="field">
+            <label for="nmCategoria">Categoria</label>
+            <input id="nmCategoria" formControlName="nmCategoria" placeholder="geral" />
+          </div>
+          <div class="field">
+            <label for="nmDatasource">Datasource</label>
+            <input id="nmDatasource" formControlName="nmDatasource" />
+            <span class="field-hint">Nome do datasource configurado no backend</span>
+          </div>
+          <div class="field">
+            <label for="dsFormatosSaida">Formatos de saída</label>
+            <input id="dsFormatosSaida" formControlName="dsFormatosSaida" placeholder="PDF,XLSX" />
+          </div>
+          <div class="field">
+            <label for="flAtivo">Status</label>
+            <select id="flAtivo" formControlName="flAtivo">
+              <option [ngValue]="true">Ativo</option>
+              <option [ngValue]="false">Inativo</option>
+            </select>
+          </div>
+          <div class="field field-full">
+            <label for="dsRelatorio">Descrição</label>
+            <textarea id="dsRelatorio" rows="3" formControlName="dsRelatorio"></textarea>
+          </div>
+        </div>
+        <div style="margin-top: 20px">
+          <button type="submit" class="btn btn-primary" [disabled]="saving || reportForm.invalid">
+            {{ saving ? 'Salvando...' : 'Salvar relatório' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- ABA: QUERIES -->
+  @if (activeTab === 'queries' && !isNew) {
+    <div class="tab-panel">
+      <div class="card">
+        <p class="hint">
+          Use <code>main</code> para os dados do detalhe. Queries auxiliares (ex.: <code>totalizador</code>)
+          viram parâmetros no JRXML no formato <code>nmQuery_coluna</code> — ex.:
+          <code>totalizador_quantidade</code>.
+        </p>
+
+        <div class="card-header">
+          <h3>Queries cadastradas</h3>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="newQuery()">+ Nova query</button>
+        </div>
+
+        @if (sortedQueries.length) {
+          <div class="query-chips">
+            @for (query of sortedQueries; track query.nmQuery) {
+              <button
+                type="button"
+                class="query-chip"
+                [class.active]="selectedQueryName === query.nmQuery"
+                (click)="selectQuery(query.nmQuery)"
+              >
+                {{ query.nmQuery }}
+                @if (!query.flAtivo) {
+                  <span class="badge off">inativa</span>
+                }
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="empty-state" style="padding: 24px">
+            <p>Nenhuma query cadastrada. Clique em <strong>Nova query</strong> para começar.</p>
+          </div>
+        }
+
+        <form [formGroup]="queryForm" (ngSubmit)="saveQuery()">
+          <div class="grid-3" style="margin-bottom: 16px">
+            <div class="field">
+              <label for="nmQuery">Nome da query</label>
+              <input id="nmQuery" formControlName="nmQuery" placeholder="main, totalizador..." />
+            </div>
+            <div class="field">
+              <label for="flAtivoQuery">Ativa</label>
+              <select id="flAtivoQuery" formControlName="flAtivo">
+                <option [ngValue]="true">Sim</option>
+                <option [ngValue]="false">Não</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>SQL</label>
+            <app-sql-editor formControlName="dsSql" minHeight="320px" />
+            <span class="field-hint">Use parâmetros nomeados: <code>:dataInicial</code>, <code>:idProjeto</code></span>
+          </div>
+
+          <div style="margin-top: 16px">
+            <button type="submit" class="btn btn-primary" [disabled]="savingQuery || queryForm.invalid">
+              {{ savingQuery ? 'Salvando...' : 'Salvar query' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ABA: FILTROS -->
+  @if (activeTab === 'filtros' && !isNew) {
+    <div class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <h3>Filtros do relatório</h3>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="newFilter()">+ Novo filtro</button>
+        </div>
+
+        @if (sortedFilters.length) {
+          <div class="table-wrap" style="margin-bottom: 20px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ordem</th>
+                  <th>Chave</th>
+                  <th>Rótulo</th>
+                  <th>Tipo</th>
+                  <th>Obrigatório</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (filtro of sortedFilters; track filtro.nmChave) {
+                  <tr [class.selected]="selectedFilterKey === filtro.nmChave">
+                    <td>{{ filtro.nuOrdem }}</td>
+                    <td><code>{{ filtro.nmChave }}</code></td>
+                    <td>{{ filtro.dsRotulo }}</td>
+                    <td><span class="badge neutral">{{ filtro.tpFiltro }}</span></td>
+                    <td>{{ filtro.flObrigatorio ? 'Sim' : 'Não' }}</td>
+                    <td>
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="selectFilter(filtro)">
+                        Editar
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <form [formGroup]="filterForm" (ngSubmit)="saveFilter()">
+          <div class="grid-3">
+            <div class="field">
+              <label for="nmChave">Chave</label>
+              <input id="nmChave" formControlName="nmChave" placeholder="dataInicial" />
+            </div>
+            <div class="field">
+              <label for="dsRotulo">Rótulo</label>
+              <input id="dsRotulo" formControlName="dsRotulo" placeholder="Data inicial" />
+            </div>
+            <div class="field">
+              <label for="tpFiltro">Tipo</label>
+              <select id="tpFiltro" formControlName="tpFiltro">
+                <option value="TEXT">TEXT</option>
+                <option value="NUMBER">NUMBER</option>
+                <option value="DATE">DATE</option>
+                <option value="DATETIME">DATETIME</option>
+                <option value="BOOLEAN">BOOLEAN</option>
+                <option value="SELECT">SELECT</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="nuOrdem">Ordem</label>
+              <input id="nuOrdem" type="number" formControlName="nuOrdem" />
+            </div>
+            <div class="field">
+              <label for="flObrigatorio">Obrigatório</label>
+              <select id="flObrigatorio" formControlName="flObrigatorio">
+                <option [ngValue]="true">Sim</option>
+                <option [ngValue]="false">Não</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="dsValorPadrao">Valor padrão</label>
+              <input id="dsValorPadrao" formControlName="dsValorPadrao" />
+            </div>
+          </div>
+
+          @if (isSelectFilter()) {
+            <div class="field" style="margin-top: 16px">
+              <label>Query de opções (SELECT)</label>
+              <app-sql-editor formControlName="dsQueryOpcoes" minHeight="160px" />
+            </div>
+          }
+
+          <div style="margin-top: 16px">
+            <button type="submit" class="btn btn-primary" [disabled]="savingFilter || filterForm.invalid">
+              {{ savingFilter ? 'Salvando...' : 'Salvar filtro' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ABA: TEMPLATES -->
+  @if (activeTab === 'templates' && !isNew) {
+    <div class="tab-panel">
+      <div class="card">
+        <p class="hint">
+          Cada upload cria uma <strong>nova versão</strong>. Você pode enviar sem ativar, testar e depois
+          <strong>ativar</strong> a versão correta ou <strong>excluir</strong> versões erradas.
+        </p>
+
+        <h3 style="margin: 0 0 16px">Enviar nova versão</h3>
+
+        <div class="file-upload">
+          <input type="file" id="templateFile" accept=".jrxml,.jasper" (change)="onTemplateSelected($event)" />
+          <label for="templateFile">
+            @if (selectedTemplateFileName) {
+              Arquivo selecionado: <strong>{{ selectedTemplateFileName }}</strong>
+            } @else {
+              Clique para selecionar um arquivo <strong>.jrxml</strong>
+            }
+          </label>
+        </div>
+
+        <div class="field" style="margin-top: 12px">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="activateOnUpload" [ngModelOptions]="{ standalone: true }" />
+            Ativar imediatamente após o envio
+          </label>
+        </div>
+
+        <div style="margin-top: 16px">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="uploadTemplate()"
+            [disabled]="!selectedTemplateFile || uploadingTemplate"
+          >
+            @if (uploadingTemplate) {
+              Enviando...
+            } @else if (activateOnUpload) {
+              Enviar e ativar
+            } @else {
+              Enviar (manter inativo)
+            }
+          </button>
+        </div>
+
+        <div class="card-header" style="margin-top: 28px">
+          <h3>Histórico de versões</h3>
+          <span class="badge neutral">{{ sortedTemplates.length }} versão(ões)</span>
+        </div>
+
+        @if (sortedTemplates.length) {
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Versão</th>
+                  <th>Arquivo</th>
+                  <th>Status</th>
+                  <th>Criado em</th>
+                  <th style="text-align: right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (template of sortedTemplates; track template.idRelatoriotemplate) {
+                  <tr [class.selected]="template.flAtivo">
+                    <td>v{{ template.nuVersao }}</td>
+                    <td>{{ template.nmArquivo }}</td>
+                    <td>
+                      <span class="badge" [class.ok]="template.flAtivo" [class.off]="!template.flAtivo">
+                        {{ template.flAtivo ? 'Ativo' : 'Inativo' }}
+                      </span>
+                    </td>
+                    <td>{{ template.dtCadastro | date: 'short' }}</td>
+                    <td style="text-align: right; white-space: nowrap">
+                      @if (!template.flAtivo) {
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-sm"
+                          [disabled]="templateActionId === template.idRelatoriotemplate"
+                          (click)="activateTemplate(template.idRelatoriotemplate)"
+                        >
+                          Ativar
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        [disabled]="templateActionId === template.idRelatoriotemplate || sortedTemplates.length <= 1"
+                        (click)="deleteTemplate(template.idRelatoriotemplate, template.nmArquivo, template.nuVersao)"
+                      >
+                        Excluir
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (sortedTemplates.length <= 1) {
+            <p class="field-hint" style="margin-top: 8px">
+              O único template não pode ser excluído. Envie outra versão antes, se necessário.
+            </p>
+          }
+        } @else {
+          <div class="empty-state" style="padding: 24px">
+            <p>Nenhum template cadastrado.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
 }

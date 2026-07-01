@@ -5,17 +5,25 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <header class="topbar">
-      <h1>Report Engine Admin</h1>
-    </header>
-    <nav class="container" style="padding-bottom: 0">
-      <a routerLink="/reports" routerLinkActive="active">Relatorios</a>
-      &nbsp;|&nbsp;
-      <a routerLink="/reports/new" routerLinkActive="active">Novo relatorio</a>
-    </nav>
-    <main class="container">
-      <router-outlet />
-    </main>
+    <div class="app-layout">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <h1>Report Engine</h1>
+          <p>Painel administrativo</p>
+        </div>
+        <nav class="sidebar-nav">
+          <a routerLink="/reports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            <span></span> Relatórios
+          </a>
+          <a routerLink="/reports/new" routerLinkActive="active">
+            <span></span> Novo relatório
+          </a>
+        </nav>
+      </aside>
+      <main class="main-content">
+        <router-outlet />
+      </main>
+    </div>
   `,
 })
 export class App {}
