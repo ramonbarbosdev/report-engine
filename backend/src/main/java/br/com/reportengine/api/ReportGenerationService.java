@@ -105,6 +105,8 @@ public class ReportGenerationService {
         filtros.forEach((key, value) -> {
             if (value instanceof LocalDate date) {
                 params.put(key, date.toString());
+            } else if (value instanceof Number number) {
+                params.put(key, toJasperNumber(number));
             } else {
                 params.put(key, value);
             }
@@ -113,6 +115,17 @@ public class ReportGenerationService {
             params.put("USUARIO_EMISSAO", nmSolicitante);
         }
         return params;
+    }
+
+    private Object toJasperNumber(Number number) {
+        if (number instanceof Double || number instanceof Float) {
+            double d = number.doubleValue();
+            if (d == Math.rint(d) && d >= Long.MIN_VALUE && d <= Long.MAX_VALUE) {
+                return (long) d;
+            }
+            return d;
+        }
+        return number.longValue();
     }
 
     /**

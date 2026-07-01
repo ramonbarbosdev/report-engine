@@ -71,8 +71,9 @@ public class FilterValidationService {
                     if (d == Math.rint(d) && d >= Long.MIN_VALUE && d <= Long.MAX_VALUE) {
                         return (long) d;
                     }
+                    return number;
                 }
-                return number;
+                return number.longValue();
             }
             String text = String.valueOf(value).trim();
             if (text.matches("-?\\d+")) {

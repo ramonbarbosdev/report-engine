@@ -61,8 +61,12 @@
 	</style>
 	<parameter name="dataInicial" class="java.lang.String"/>
 	<parameter name="dataFinal" class="java.lang.String"/>
-	<parameter name="idProjeto" class="java.lang.Long"/>
-	<parameter name="idTecnico" class="java.lang.Long"/>
+	<parameter name="idProjeto" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<parameter name="idTecnico" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
 	<parameter name="USUARIO_EMISSAO" class="java.lang.String">
 		<defaultValueExpression><![CDATA["Sistema"]]></defaultValueExpression>
 	</parameter>
@@ -123,9 +127,9 @@
 	<variable name="FILTROS_APLICADOS" class="java.lang.String">
 		<variableExpression><![CDATA[($P{idTecnico} == null && $P{idProjeto} == null)
                 ? "Nenhum filtro adicional"
-                : ($P{idTecnico} != null ? "Técnico ID: " + $P{idTecnico} : "")
+                : ($P{idTecnico} != null ? "Técnico ID: " + String.valueOf($P{idTecnico}) : "")
                   + ($P{idTecnico} != null && $P{idProjeto} != null ? " | " : "")
-                  + ($P{idProjeto} != null ? "Projeto ID: " + $P{idProjeto} : "")]]></variableExpression>
+                  + ($P{idProjeto} != null ? "Projeto ID: " + String.valueOf($P{idProjeto}) : "")]]></variableExpression>
 	</variable>
 	<title>
 		<band height="92" splitType="Stretch">
