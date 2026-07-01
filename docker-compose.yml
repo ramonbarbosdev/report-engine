@@ -1,0 +1,15 @@
+services:
+  report-engine-db:
+    image: postgres:16-alpine
+    container_name: report-engine-db
+    environment:
+      POSTGRES_DB: report_engine
+      POSTGRES_USER: report
+      POSTGRES_PASSWORD: report
+    ports:
+      - "5433:5432"
+    volumes:
+      - report_engine_pg:/var/lib/postgresql/data
+
+volumes:
+  report_engine_pg:

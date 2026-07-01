@@ -1,0 +1,42 @@
+<div class="card">
+  <h2>Catalogo de relatorios</h2>
+
+  @if (loading) {
+    <p>Carregando...</p>
+  } @else if (error) {
+    <p class="error">{{ error }}</p>
+  } @else if (reports.length === 0) {
+    <p>Nenhum relatorio cadastrado.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th>Versao</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (report of reports; track report.cdRelatorio) {
+          <tr>
+            <td>{{ report.cdRelatorio }}</td>
+            <td>{{ report.nmRelatorio }}</td>
+            <td>{{ report.nmCategoria || '-' }}</td>
+            <td>{{ report.nuVersao }}</td>
+            <td>
+              <span class="badge" [class.ok]="report.flAtivo" [class.off]="!report.flAtivo">
+                {{ report.flAtivo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td>
+              <a [routerLink]="['/reports', report.cdRelatorio]">Editar</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

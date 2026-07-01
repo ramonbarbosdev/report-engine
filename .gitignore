@@ -1,0 +1,26 @@
+# Maven
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# Angular
+admin-ui/node_modules/
+admin-ui/dist/
+admin-ui/.angular/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.class
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+*.log
+
+# Templates upload
+data/templates/*
+!data/templates/.gitkeep

@@ -1,0 +1,187 @@
+<h2>{{ isNew ? 'Novo relatorio' : 'Editar relatorio' }}</h2>
+
+@if (loading) {
+  <p>Carregando...</p>
+} @else {
+  @if (message) {
+    <p>{{ message }}</p>
+  }
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  <div class="card">
+    <h3>Dados gerais</h3>
+    <form [formGroup]="reportForm" (ngSubmit)="saveReport()" class="grid-2">
+      <div>
+        <label for="cdRelatorio">Codigo</label>
+        <input id="cdRelatorio" formControlName="cdRelatorio" [readonly]="!isNew" />
+      </div>
+      <div>
+        <label for="nmRelatorio">Nome</label>
+        <input id="nmRelatorio" formControlName="nmRelatorio" />
+      </div>
+      <div>
+        <label for="nmCategoria">Categoria</label>
+        <input id="nmCategoria" formControlName="nmCategoria" />
+      </div>
+      <div>
+        <label for="nmDatasource">Datasource</label>
+        <input id="nmDatasource" formControlName="nmDatasource" />
+      </div>
+      <div>
+        <label for="dsFormatosSaida">Formatos</label>
+        <input id="dsFormatosSaida" formControlName="dsFormatosSaida" />
+      </div>
+      <div>
+        <label for="flAtivo">Ativo</label>
+        <select id="flAtivo" formControlName="flAtivo">
+          <option [ngValue]="true">Sim</option>
+          <option [ngValue]="false">Nao</option>
+        </select>
+      </div>
+      <div style="grid-column: 1 / -1">
+        <label for="dsRelatorio">Descricao</label>
+        <textarea id="dsRelatorio" rows="3" formControlName="dsRelatorio"></textarea>
+      </div>
+      <div>
+        <button type="submit" [disabled]="saving || reportForm.invalid">
+          {{ saving ? 'Salvando...' : 'Salvar relatorio' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  @if (!isNew) {
+    <div class="card">
+      <h3>Query principal</h3>
+      <form [formGroup]="queryForm" (ngSubmit)="saveQuery()">
+        <div class="grid-2">
+          <div>
+            <label for="nmQuery">Nome</label>
+            <input id="nmQuery" formControlName="nmQuery" />
+          </div>
+          <div>
+            <label for="flAtivoQuery">Ativa</label>
+            <select id="flAtivoQuery" formControlName="flAtivo">
+              <option [ngValue]="true">Sim</option>
+              <option [ngValue]="false">Nao</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top: 12px">
+          <label for="dsSql">SQL</label>
+          <textarea id="dsSql" rows="8" formControlName="dsSql"></textarea>
+        </div>
+        <div style="margin-top: 12px">
+          <button type="submit" [disabled]="queryForm.invalid">Salvar query</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Filtros</h3>
+      <form [formGroup]="filterForm" (ngSubmit)="saveFilter()" class="grid-2">
+        <div>
+          <label for="nmChave">Chave</label>
+          <input id="nmChave" formControlName="nmChave" />
+        </div>
+        <div>
+          <label for="dsRotulo">Rotulo</label>
+          <input id="dsRotulo" formControlName="dsRotulo" />
+        </div>
+        <div>
+          <label for="tpFiltro">Tipo</label>
+          <select id="tpFiltro" formControlName="tpFiltro">
+            <option value="TEXT">TEXT</option>
+            <option value="NUMBER">NUMBER</option>
+            <option value="DATE">DATE</option>
+            <option value="DATETIME">DATETIME</option>
+            <option value="BOOLEAN">BOOLEAN</option>
+            <option value="SELECT">SELECT</option>
+          </select>
+        </div>
+        <div>
+          <label for="nuOrdem">Ordem</label>
+          <input id="nuOrdem" type="number" formControlName="nuOrdem" />
+        </div>
+        <div>
+          <label for="flObrigatorio">Obrigatorio</label>
+          <select id="flObrigatorio" formControlName="flObrigatorio">
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Nao</option>
+          </select>
+        </div>
+        <div>
+          <label for="dsValorPadrao">Valor padrao</label>
+          <input id="dsValorPadrao" formControlName="dsValorPadrao" />
+        </div>
+        <div style="grid-column: 1 / -1">
+          <label for="dsQueryOpcoes">Query de opcoes (SELECT)</label>
+          <textarea id="dsQueryOpcoes" rows="3" formControlName="dsQueryOpcoes"></textarea>
+        </div>
+        <div>
+          <button type="submit" [disabled]="filterForm.invalid">Adicionar/atualizar filtro</button>
+        </div>
+      </form>
+
+      @if (detail?.filtros?.length) {
+        <table style="margin-top: 16px">
+          <thead>
+            <tr>
+              <th>Chave</th>
+              <th>Rotulo</th>
+              <th>Tipo</th>
+              <th>Obrigatorio</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (filtro of detail!.filtros; track filtro.nmChave) {
+              <tr>
+                <td>{{ filtro.nmChave }}</td>
+                <td>{{ filtro.dsRotulo }}</td>
+                <td>{{ filtro.tpFiltro }}</td>
+                <td>{{ filtro.flObrigatorio ? 'Sim' : 'Nao' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="card">
+      <h3>Templates JRXML</h3>
+      <input type="file" accept=".jrxml,.jasper" (change)="onTemplateSelected($event)" />
+      <div style="margin-top: 12px">
+        <button type="button" (click)="uploadTemplate()" [disabled]="!selectedTemplateFile">
+          Enviar template
+        </button>
+      </div>
+
+      @if (detail?.templates?.length) {
+        <table style="margin-top: 16px">
+          <thead>
+            <tr>
+              <th>Versao</th>
+              <th>Arquivo</th>
+              <th>Ativo</th>
+              <th>Criado em</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (template of detail!.templates; track template.idRelatoriotemplate) {
+              <tr>
+                <td>{{ template.nuVersao }}</td>
+                <td>{{ template.nmArquivo }}</td>
+                <td>{{ template.flAtivo ? 'Sim' : 'Nao' }}</td>
+                <td>{{ template.dtCadastro | date: 'short' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+
+  <p><a routerLink="/reports">Voltar para lista</a></p>
+}
