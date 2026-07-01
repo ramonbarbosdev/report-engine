@@ -7,8 +7,8 @@ import br.com.reportengine.domain.entity.ReportExecutionLogEntity;
 import br.com.reportengine.domain.entity.ReportQueryEntity;
 import br.com.reportengine.domain.entity.ReportTemplateEntity;
 import br.com.reportengine.domain.enums.OutputFormat;
-import br.com.reportengine.domain.repository.ReportDefinitionRepository;
 import br.com.reportengine.domain.repository.ReportExecutionLogRepository;
+import br.com.reportengine.domain.service.ReportDefinitionLoader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ReportGenerationService {
 
-    private final ReportDefinitionRepository reportRepository;
+    private final ReportDefinitionLoader reportDefinitionLoader;
     private final ReportExecutionLogRepository executionLogRepository;
     private final FilterValidationService filterValidationService;
     private final QueryExecutorService queryExecutorService;
@@ -32,9 +32,10 @@ public class ReportGenerationService {
     @Transactional
     public GeneratedReport generate(String cdRelatorio, GenerateReportRequest request, String nmSolicitante) {
         long startedAt = System.currentTimeMillis();
-        ReportDefinitionEntity relatorio = reportRepository.findWithDetailsByCdRelatorio(cdRelatorio)
-                .filter(ReportDefinitionEntity::isFlAtivo)
-                .orElseThrow(() -> ReportEngineException.notFound("Relatorio nao encontrado: " + cdRelatorio));
+        ReportDefinitionEntity relatorio = reportDefinitionLoader.loadWithDetails(cdRelatorio);
+        if (!relatorio.isFlAtivo()) {
+            throw ReportEngineException.notFound("Relatorio nao encontrado: " + cdRelatorio);
+        }
 
         OutputFormat format = OutputFormat.fromString(request.tpFormatoSaida());
         Map<String, Object> filtros = filterValidationService.validateAndNormalize(

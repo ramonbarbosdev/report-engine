@@ -6,6 +6,7 @@ import br.com.reportengine.core.ReportEngineException;
 import br.com.reportengine.core.ReportTemplateStorageService;
 import br.com.reportengine.domain.entity.*;
 import br.com.reportengine.domain.repository.ReportDefinitionRepository;
+import br.com.reportengine.domain.service.ReportDefinitionLoader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.List;
 public class ReportAdminService {
 
     private final ReportDefinitionRepository reportRepository;
+    private final ReportDefinitionLoader reportDefinitionLoader;
     private final ReportTemplateStorageService templateStorage;
     private final JasperReportService jasperReportService;
 
@@ -131,8 +133,7 @@ public class ReportAdminService {
     }
 
     private ReportDefinitionEntity findByCdRelatorioOrThrow(String cdRelatorio) {
-        return reportRepository.findWithDetailsByCdRelatorio(cdRelatorio)
-                .orElseThrow(() -> ReportEngineException.notFound("Relatorio nao encontrado: " + cdRelatorio));
+        return reportDefinitionLoader.loadWithDetails(cdRelatorio);
     }
 
     private void apply(ReportDefinitionEntity entity, ReportUpsertRequest request) {

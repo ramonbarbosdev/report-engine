@@ -7,6 +7,7 @@ import br.com.reportengine.core.ReportEngineException;
 import br.com.reportengine.domain.entity.ReportDefinitionEntity;
 import br.com.reportengine.domain.entity.ReportFilterEntity;
 import br.com.reportengine.domain.repository.ReportDefinitionRepository;
+import br.com.reportengine.domain.service.ReportDefinitionLoader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.List;
 public class ReportCatalogService {
 
     private final ReportDefinitionRepository reportRepository;
+    private final ReportDefinitionLoader reportDefinitionLoader;
 
     @Transactional(readOnly = true)
     public List<ReportSummaryDTO> listActiveReports() {
@@ -29,9 +31,10 @@ public class ReportCatalogService {
 
     @Transactional(readOnly = true)
     public ReportDefinitionDTO getDefinition(String cdRelatorio) {
-        ReportDefinitionEntity relatorio = reportRepository.findWithDetailsByCdRelatorio(cdRelatorio)
-                .filter(ReportDefinitionEntity::isFlAtivo)
-                .orElseThrow(() -> ReportEngineException.notFound("Relatorio nao encontrado: " + cdRelatorio));
+        ReportDefinitionEntity relatorio = reportDefinitionLoader.loadWithDetails(cdRelatorio);
+        if (!relatorio.isFlAtivo()) {
+            throw ReportEngineException.notFound("Relatorio nao encontrado: " + cdRelatorio);
+        }
         return toDefinition(relatorio);
     }
 
