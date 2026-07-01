@@ -27,3 +27,4 @@ data/templates/*
 !data/templates/exemplo-visitas/
 !data/templates/relacao-visitas/
 !data/templates/comissao-projetista/
+!data/templates/comissao-tecnico/
