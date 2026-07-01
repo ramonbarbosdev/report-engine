@@ -24,3 +24,5 @@ Thumbs.db
 # Templates upload
 data/templates/*
 !data/templates/.gitkeep
+!data/templates/exemplo-visitas/
+!data/templates/relacao-visitas/

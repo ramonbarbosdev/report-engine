@@ -13,7 +13,7 @@ import java.util.Map;
 public class ReportEngineProperties {
 
     private String apiKey;
-    private String templatesPath = "../data/templates";
+    private String templatesPath = "data/templates";
     private int maxRows = 50_000;
     private Map<String, DatasourceProperties> datasources = new LinkedHashMap<>();
 

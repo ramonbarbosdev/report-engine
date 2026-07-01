@@ -49,7 +49,7 @@ Variaveis principais:
 | `REPORT_DB_METADATA_URL` | Banco de metadados do engine |
 | `REPORT_DATASOURCE_PRINCIPAL_URL` | Banco read-only do sistema principal |
 | `REPORT_AUTH_API_KEY` | Chave para autenticacao entre sistemas |
-| `REPORT_TEMPLATES_PATH` | Pasta dos templates JRXML |
+| `REPORT_TEMPLATES_PATH` | Pasta dos templates JRXML (padrao: `data/templates`; o backend localiza essa pasta automaticamente a partir do diretorio de execucao) |
 
 ## Rodar backend
 
@@ -123,7 +123,21 @@ Payload sugerido:
 }
 ```
 
-## Relatorio de exemplo
+## Relatorio piloto: Relacao de Visitas
+
+Migrado do agrotech (`geral/relacaovisita` -> `relacao-visitas`).
+
+| Item | Valor |
+|------|-------|
+| `cdRelatorio` | `relacao-visitas` |
+| Filtros | `dataInicial`, `dataFinal`, `idProjeto`, `idTecnico` |
+| Template | `data/templates/relacao-visitas/v1.jrxml` |
+| Migration | `V4__agrotech_relacao_visitas.sql` |
+
+No agrotech, o `RelatorioService` redireciona automaticamente quando `reportEngineUrl` e `reportEngineApiKey` estao no `environment.ts`.
+
+**Importante:** valide os nomes das tabelas/colunas no banco agrotech. A SQL foi montada a partir do front e pode precisar de ajuste fino se o schema legado diferir.
+
 
 A migration inicial cria o relatorio `exemplo-visitas` com:
 

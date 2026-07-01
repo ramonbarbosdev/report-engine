@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="relacao-visitas"
+              pageWidth="842"
+              pageHeight="595"
+              orientation="Landscape"
+              whenNoDataType="AllSectionsNoDetail"
+              columnWidth="802"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="12"
+              bottomMargin="16">
+    <parameter name="dataInicial" class="java.lang.String"/>
+    <parameter name="dataFinal" class="java.lang.String"/>
+    <field name="nm_cliente" class="java.lang.String"/>
+    <field name="nm_propriedadecliente" class="java.lang.String"/>
+    <field name="nm_tecnico" class="java.lang.String"/>
+    <field name="vl_visitafinal" class="java.lang.Double"/>
+    <field name="vl_adicionalvisita" class="java.lang.Double"/>
+    <field name="dt_visita" class="java.sql.Date"/>
+    <field name="tp_statusvisita" class="java.lang.String"/>
+    <variable name="SEQ" class="java.lang.Integer" calculation="Count">
+        <variableExpression><![CDATA[1]]></variableExpression>
+    </variable>
+    <title>
+        <band height="40">
+            <staticText>
+                <reportElement x="0" y="0" width="802" height="22"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Relacao de Visitas]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="22" width="802" height="16"/>
+                <textFieldExpression><![CDATA["Periodo: " + ($P{dataInicial} == null ? "-" : $P{dataInicial}) + " ate " + ($P{dataFinal} == null ? "-" : $P{dataFinal})]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <columnHeader>
+        <band height="14">
+            <staticText>
+                <reportElement x="0" y="0" width="28" height="14"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[#]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="28" y="0" width="135" height="14"/>
+                <text><![CDATA[Cliente]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="163" y="0" width="125" height="14"/>
+                <text><![CDATA[Propriedade]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="288" y="0" width="115" height="14"/>
+                <text><![CDATA[Tecnico]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="403" y="0" width="70" height="14"/>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Data visita]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="473" y="0" width="62" height="14"/>
+                <text><![CDATA[Status]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="535" y="0" width="98" height="14"/>
+                <textElement textAlignment="Right"/>
+                <text><![CDATA[Adicional]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="633" y="0" width="169" height="14"/>
+                <textElement textAlignment="Right"/>
+                <text><![CDATA[Valor]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="14">
+            <textField>
+                <reportElement x="0" y="0" width="28" height="14"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$V{SEQ}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="28" y="0" width="135" height="14"/>
+                <textFieldExpression><![CDATA[$F{nm_cliente}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="163" y="0" width="125" height="14"/>
+                <textFieldExpression><![CDATA[$F{nm_propriedadecliente}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="288" y="0" width="115" height="14"/>
+                <textFieldExpression><![CDATA[$F{nm_tecnico}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+                <reportElement x="403" y="0" width="70" height="14"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{dt_visita}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="473" y="0" width="62" height="14"/>
+                <textFieldExpression><![CDATA[$F{tp_statusvisita}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00" isBlankWhenNull="true">
+                <reportElement x="535" y="0" width="98" height="14"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{vl_adicionalvisita}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00" isBlankWhenNull="true">
+                <reportElement x="633" y="0" width="169" height="14"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{vl_visitafinal}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <pageFooter>
+        <band height="16">
+            <textField>
+                <reportElement x="676" y="2" width="70" height="12"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="748" y="2" width="54" height="12"/>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

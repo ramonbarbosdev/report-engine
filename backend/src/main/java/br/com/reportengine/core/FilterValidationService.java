@@ -53,7 +53,11 @@ public class FilterValidationService {
             if (value instanceof LocalDate localDate) {
                 return localDate;
             }
-            return LocalDate.parse(String.valueOf(value));
+            String text = String.valueOf(value).trim();
+            if (text.length() >= 10 && text.charAt(4) == '-' && text.charAt(7) == '-') {
+                return LocalDate.parse(text.substring(0, 10));
+            }
+            return LocalDate.parse(text);
         } catch (DateTimeParseException ex) {
             throw ReportEngineException.badRequest("Data invalida: " + value);
         }
@@ -62,9 +66,19 @@ public class FilterValidationService {
     private Number parseNumber(Object value) {
         try {
             if (value instanceof Number number) {
+                if (number instanceof Double || number instanceof Float) {
+                    double d = number.doubleValue();
+                    if (d == Math.rint(d) && d >= Long.MIN_VALUE && d <= Long.MAX_VALUE) {
+                        return (long) d;
+                    }
+                }
                 return number;
             }
-            return Double.valueOf(String.valueOf(value));
+            String text = String.valueOf(value).trim();
+            if (text.matches("-?\\d+")) {
+                return Long.valueOf(text);
+            }
+            return Double.valueOf(text);
         } catch (NumberFormatException ex) {
             throw ReportEngineException.badRequest("Numero invalido: " + value);
         }
