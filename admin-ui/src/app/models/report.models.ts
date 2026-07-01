@@ -58,3 +58,14 @@ export interface ReportUpsert {
   flAtivo: boolean;
   dsFormatosSaida?: string;
 }
+
+export interface ReportQueryValidation {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface ReportQuerySaveResult {
+  detail: ReportDetail;
+  warnings: string[];
+}

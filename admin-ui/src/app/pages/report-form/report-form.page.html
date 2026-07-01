@@ -123,7 +123,31 @@
           injetam as colunas do primeiro registro como <strong>fields</strong> em cada linha do detalhe
           (alias SQL da coluna) — ex.: <code>quantidade</code>, <code>total_visita</code>.
           No JRXML use <code>quantidade</code> no summary.
+          Filtros opcionais: <code>coluna = COALESCE(:parametro, coluna)</code> — sem <code>TO_DATE</code>,
+          sem <code>;</code> no final e sem <code>LIMIT</code>.
         </p>
+
+        @if (queryErrors.length) {
+          <div class="alert alert-error" role="alert">
+            <strong>Erros no SQL</strong>
+            <ul class="validation-list">
+              @for (item of queryErrors; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (queryWarnings.length) {
+          <div class="alert alert-info" role="alert">
+            <strong>Avisos</strong>
+            <ul class="validation-list">
+              @for (item of queryWarnings; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          </div>
+        }
 
         <div class="card-header">
           <h3>Queries cadastradas</h3>
@@ -170,10 +194,16 @@
           <div class="field">
             <label>SQL</label>
             <app-sql-editor formControlName="dsSql" minHeight="320px" />
-            <span class="field-hint">Use parâmetros nomeados: <code>:dataInicial</code>, <code>:idProjeto</code></span>
+            <span class="field-hint">
+              Parametros nomeados (<code>:dataInicial</code>, <code>:idTecnico</code>).
+              Filtros de data: <code>COALESCE(:dataInicial, coluna_data)</code>.
+            </span>
           </div>
 
-          <div style="margin-top: 16px">
+          <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap">
+            <button type="button" class="btn btn-secondary" [disabled]="validatingQuery || queryForm.invalid" (click)="validateQuery()">
+              {{ validatingQuery ? 'Validando...' : 'Validar SQL' }}
+            </button>
             <button type="submit" class="btn btn-primary" [disabled]="savingQuery || queryForm.invalid">
               {{ savingQuery ? 'Salvando...' : 'Salvar query' }}
             </button>

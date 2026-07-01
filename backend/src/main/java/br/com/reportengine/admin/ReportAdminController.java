@@ -40,11 +40,19 @@ public class ReportAdminController {
     }
 
     @PutMapping("/{cdRelatorio}/queries")
-    public ReportAdminDetailDTO upsertQuery(
+    public ReportQuerySaveResult upsertQuery(
             @PathVariable String cdRelatorio,
             @Valid @RequestBody ReportQueryUpsertRequest request
     ) {
         return adminService.upsertQuery(cdRelatorio, request);
+    }
+
+    @PostMapping("/{cdRelatorio}/queries/validate")
+    public ReportQueryValidationDTO validateQuery(
+            @PathVariable String cdRelatorio,
+            @Valid @RequestBody ReportQueryUpsertRequest request
+    ) {
+        return adminService.validateQuery(cdRelatorio, request);
     }
 
     @PutMapping("/{cdRelatorio}/filters")

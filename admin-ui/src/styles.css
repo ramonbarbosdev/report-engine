@@ -453,6 +453,20 @@ td code {
   border: 1px solid #bfdbfe;
 }
 
+.validation-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.validation-list li + li {
+  margin-top: 4px;
+}
+
+.alert strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
 .alert-icon {
   font-weight: 700;
   width: 20px;

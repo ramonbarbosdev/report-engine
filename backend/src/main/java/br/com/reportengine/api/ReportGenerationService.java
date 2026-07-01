@@ -33,6 +33,7 @@ public class ReportGenerationService {
     private final JasperReportService jasperReportService;
     private final ObjectMapper objectMapper;
     private final ReportJasperParameterBuilder jasperParameterBuilder;
+    private final ReportQueryValidationService queryValidationService;
 
     @Transactional
     public GeneratedReport generate(String cdRelatorio, GenerateReportRequest request, String nmSolicitante) {
@@ -47,6 +48,8 @@ public class ReportGenerationService {
                 relatorio,
                 request.filtros()
         );
+
+        queryValidationService.validateActiveQueries(relatorio).throwIfHasErrors();
 
         ReportQueryEntity mainQuery = relatorio.getQueries().stream()
                 .filter(ReportQueryEntity::isFlAtivo)

@@ -2,6 +2,7 @@ package br.com.reportengine.core;
 
 import br.com.reportengine.config.ReportEngineProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,21 +31,43 @@ public class QueryExecutorService {
 
         NamedParameterJdbcTemplate jdbc = new NamedParameterJdbcTemplate(dataSource);
         Map<String, Object> safeParams = sanitizeParameters(parameters);
+        String executableSql = prepareSql(sql);
 
-        List<Map<String, Object>> rows = jdbc.query(
-                sql + " LIMIT " + properties.getMaxRows(),
-                safeParams,
-                (rs, rowNum) -> {
-                    var meta = rs.getMetaData();
-                    Map<String, Object> row = new LinkedHashMap<>();
-                    for (int i = 1; i <= meta.getColumnCount(); i++) {
-                        row.put(meta.getColumnLabel(i), rs.getObject(i));
+        try {
+            List<Map<String, Object>> rows = jdbc.query(
+                    executableSql + " LIMIT " + properties.getMaxRows(),
+                    safeParams,
+                    (rs, rowNum) -> {
+                        var meta = rs.getMetaData();
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        for (int i = 1; i <= meta.getColumnCount(); i++) {
+                            row.put(meta.getColumnLabel(i), rs.getObject(i));
+                        }
+                        return row;
                     }
-                    return row;
-                }
-        );
+            );
 
-        return new QueryExecutionResult(new ArrayList<>(rows), rows.size());
+            return new QueryExecutionResult(new ArrayList<>(rows), rows.size());
+        } catch (DataAccessException ex) {
+            String cause = ex.getMostSpecificCause().getMessage();
+            List<String> hints = new ArrayList<>();
+            if (cause != null) {
+                if (cause.contains("?") || cause.toLowerCase().contains("bad sql grammar")) {
+                    hints.add("Revise a query no admin: use parametros nomeados (:idTecnico) e COALESCE para filtros opcionais.");
+                }
+                if (cause.toLowerCase().contains("invalid input syntax for type date")) {
+                    hints.add("Nao use TO_DATE ou NULLIF com string vazia. Use COALESCE(:dataInicial, coluna_data).");
+                }
+            }
+            List<String> errors = new ArrayList<>();
+            errors.add(cause == null ? "Falha ao executar SQL do relatorio." : cause);
+            errors.addAll(hints);
+            throw new ReportValidationException(
+                    "Erro ao executar SQL do relatorio. " + (cause == null ? "" : cause),
+                    errors,
+                    List.of()
+            );
+        }
     }
 
     private Map<String, Object> sanitizeParameters(Map<String, Object> parameters) {
@@ -60,6 +83,13 @@ public class QueryExecutorService {
             }
         });
         return safe;
+    }
+
+    private String prepareSql(String sql) {
+        if (sql == null) {
+            return "";
+        }
+        return sql.strip().replaceAll(";\\s*$", "");
     }
 
     public record QueryExecutionResult(List<Map<String, Object>> rows, int nuLinhas) {

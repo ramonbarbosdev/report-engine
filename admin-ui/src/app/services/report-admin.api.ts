@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { ReportDetail, ReportSummary, ReportUpsert } from '../models/report.models';
+import { ReportDetail, ReportQuerySaveResult, ReportQueryValidation, ReportSummary, ReportUpsert } from '../models/report.models';
 
 @Injectable({ providedIn: 'root' })
 export class ReportAdminApi {
@@ -25,7 +25,11 @@ export class ReportAdminApi {
   }
 
   upsertQuery(cdRelatorio: string, payload: { nmQuery: string; dsSql: string; flAtivo: boolean }) {
-    return this.http.put<ReportDetail>(`${this.baseUrl}/${cdRelatorio}/queries`, payload);
+    return this.http.put<ReportQuerySaveResult>(`${this.baseUrl}/${cdRelatorio}/queries`, payload);
+  }
+
+  validateQuery(cdRelatorio: string, payload: { nmQuery: string; dsSql: string; flAtivo: boolean }) {
+    return this.http.post<ReportQueryValidation>(`${this.baseUrl}/${cdRelatorio}/queries/validate`, payload);
   }
 
   upsertFilter(

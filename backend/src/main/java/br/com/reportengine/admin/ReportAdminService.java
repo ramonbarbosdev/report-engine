@@ -3,6 +3,8 @@ package br.com.reportengine.admin;
 import br.com.reportengine.admin.dto.*;
 import br.com.reportengine.core.JasperReportService;
 import br.com.reportengine.core.ReportEngineException;
+import br.com.reportengine.core.ReportQueryValidationResult;
+import br.com.reportengine.core.ReportQueryValidationService;
 import br.com.reportengine.core.ReportTemplateStorageService;
 import br.com.reportengine.domain.entity.*;
 import br.com.reportengine.domain.repository.ReportDefinitionRepository;
@@ -23,6 +25,7 @@ public class ReportAdminService {
     private final ReportDefinitionLoader reportDefinitionLoader;
     private final ReportTemplateStorageService templateStorage;
     private final JasperReportService jasperReportService;
+    private final ReportQueryValidationService queryValidationService;
 
     @Transactional(readOnly = true)
     public List<ReportSummaryAdminDTO> listAll() {
@@ -66,8 +69,14 @@ public class ReportAdminService {
     }
 
     @Transactional
-    public ReportAdminDetailDTO upsertQuery(String cdRelatorio, ReportQueryUpsertRequest request) {
+    public ReportQuerySaveResult upsertQuery(String cdRelatorio, ReportQueryUpsertRequest request) {
         ReportDefinitionEntity relatorio = findByCdRelatorioOrThrow(cdRelatorio);
+        List<String> filterKeys = relatorio.getFiltros().stream()
+                .map(ReportFilterEntity::getNmChave)
+                .toList();
+        ReportQueryValidationResult validation = queryValidationService.validate(request.dsSql(), filterKeys);
+        validation.throwIfHasErrors();
+
         ReportQueryEntity query = relatorio.getQueries().stream()
                 .filter(q -> q.getNmQuery().equalsIgnoreCase(request.nmQuery()))
                 .findFirst()
@@ -80,7 +89,21 @@ public class ReportAdminService {
                 });
         query.setDsSql(request.dsSql());
         query.setFlAtivo(request.flAtivo());
-        return toDetail(reportRepository.save(relatorio));
+        return new ReportQuerySaveResult(toDetail(reportRepository.save(relatorio)), validation.warnings());
+    }
+
+    @Transactional(readOnly = true)
+    public ReportQueryValidationDTO validateQuery(String cdRelatorio, ReportQueryUpsertRequest request) {
+        ReportDefinitionEntity relatorio = findByCdRelatorioOrThrow(cdRelatorio);
+        List<String> filterKeys = relatorio.getFiltros().stream()
+                .map(ReportFilterEntity::getNmChave)
+                .toList();
+        ReportQueryValidationResult validation = queryValidationService.validate(request.dsSql(), filterKeys);
+        return new ReportQueryValidationDTO(
+                !validation.hasErrors(),
+                validation.errors(),
+                validation.warnings()
+        );
     }
 
     @Transactional

@@ -37,6 +37,9 @@ export class ReportFormPage implements OnInit {
   uploadingTemplate = false;
   message = '';
   error = '';
+  queryErrors: string[] = [];
+  queryWarnings: string[] = [];
+  validatingQuery = false;
   activeTab: ReportFormTab = 'geral';
   selectedQueryName = '';
   selectedFilterKey = '';
@@ -135,17 +138,41 @@ export class ReportFormPage implements OnInit {
     this.savingQuery = true;
     this.clearAlerts();
     this.api.upsertQuery(this.cdRelatorio, this.queryForm.getRawValue() as any).subscribe({
-      next: (detail) => {
+      next: (result) => {
         this.savingQuery = false;
         this.message = 'Query salva com sucesso';
-        this.patchDetail(detail);
+        this.queryWarnings = result.warnings ?? [];
+        this.patchDetail(result.detail);
         const nmQuery = this.queryForm.getRawValue().nmQuery!;
         this.selectQuery(nmQuery);
       },
-      error: (err) => {
+      error: (err) => this.handleQueryError(err, 'Falha ao salvar query', () => {
         this.savingQuery = false;
-        this.error = err?.error?.detail ?? 'Falha ao salvar query';
+      }),
+    });
+  }
+
+  validateQuery(): void {
+    if (this.queryForm.invalid || this.isNew) {
+      return;
+    }
+
+    this.validatingQuery = true;
+    this.clearQueryValidation();
+    this.api.validateQuery(this.cdRelatorio, this.queryForm.getRawValue() as any).subscribe({
+      next: (result) => {
+        this.validatingQuery = false;
+        this.queryErrors = result.errors ?? [];
+        this.queryWarnings = result.warnings ?? [];
+        if (result.valid && !this.queryWarnings.length) {
+          this.message = 'SQL valido. Nenhum problema encontrado.';
+        } else if (result.valid) {
+          this.message = 'SQL valido, mas ha avisos. Revise antes de gerar o relatorio.';
+        }
       },
+      error: (err) => this.handleQueryError(err, 'Falha ao validar query', () => {
+        this.validatingQuery = false;
+      }),
     });
   }
 
@@ -155,6 +182,7 @@ export class ReportFormPage implements OnInit {
       return;
     }
     this.selectedQueryName = nmQuery;
+    this.clearQueryValidation();
     this.queryForm.patchValue({
       nmQuery: query.nmQuery,
       dsSql: query.dsSql,
@@ -164,6 +192,7 @@ export class ReportFormPage implements OnInit {
 
   newQuery(): void {
     this.selectedQueryName = '';
+    this.clearQueryValidation();
     this.queryForm.reset({
       nmQuery: '',
       dsSql: '',
@@ -328,8 +357,26 @@ export class ReportFormPage implements OnInit {
     }
   }
 
-  private clearAlerts(): void {
+  private   clearAlerts(): void {
     this.message = '';
     this.error = '';
+    this.clearQueryValidation();
+  }
+
+  clearQueryValidation(): void {
+    this.queryErrors = [];
+    this.queryWarnings = [];
+  }
+
+  private handleQueryError(err: any, fallback: string, finalize?: () => void): void {
+    finalize?.();
+    const body = err?.error;
+    if (Array.isArray(body?.errors) && body.errors.length) {
+      this.queryErrors = body.errors;
+    }
+    if (Array.isArray(body?.warnings) && body.warnings.length) {
+      this.queryWarnings = body.warnings;
+    }
+    this.error = body?.detail ?? fallback;
   }
 }
