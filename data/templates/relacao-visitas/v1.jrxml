@@ -1,135 +1,452 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
-              name="relacao-visitas"
-              pageWidth="842"
-              pageHeight="595"
-              orientation="Landscape"
-              whenNoDataType="AllSectionsNoDetail"
-              columnWidth="802"
-              leftMargin="20"
-              rightMargin="20"
-              topMargin="12"
-              bottomMargin="16">
-    <parameter name="dataInicial" class="java.lang.String"/>
-    <parameter name="dataFinal" class="java.lang.String"/>
-    <field name="nm_cliente" class="java.lang.String"/>
-    <field name="nm_propriedadecliente" class="java.lang.String"/>
-    <field name="nm_tecnico" class="java.lang.String"/>
-    <field name="vl_visitafinal" class="java.lang.Double"/>
-    <field name="vl_adicionalvisita" class="java.lang.Double"/>
-    <field name="dt_visita" class="java.sql.Date"/>
-    <field name="tp_statusvisita" class="java.lang.String"/>
-    <variable name="SEQ" class="java.lang.Integer" calculation="Count">
-        <variableExpression><![CDATA[1]]></variableExpression>
-    </variable>
-    <title>
-        <band height="40">
-            <staticText>
-                <reportElement x="0" y="0" width="802" height="22"/>
-                <textElement>
-                    <font size="14" isBold="true"/>
-                </textElement>
-                <text><![CDATA[Relacao de Visitas]]></text>
-            </staticText>
-            <textField>
-                <reportElement x="0" y="22" width="802" height="16"/>
-                <textFieldExpression><![CDATA["Periodo: " + ($P{dataInicial} == null ? "-" : $P{dataInicial}) + " ate " + ($P{dataFinal} == null ? "-" : $P{dataFinal})]]></textFieldExpression>
-            </textField>
-        </band>
-    </title>
-    <columnHeader>
-        <band height="14">
-            <staticText>
-                <reportElement x="0" y="0" width="28" height="14"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                <text><![CDATA[#]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="28" y="0" width="135" height="14"/>
-                <text><![CDATA[Cliente]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="163" y="0" width="125" height="14"/>
-                <text><![CDATA[Propriedade]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="288" y="0" width="115" height="14"/>
-                <text><![CDATA[Tecnico]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="403" y="0" width="70" height="14"/>
-                <textElement textAlignment="Center"/>
-                <text><![CDATA[Data visita]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="473" y="0" width="62" height="14"/>
-                <text><![CDATA[Status]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="535" y="0" width="98" height="14"/>
-                <textElement textAlignment="Right"/>
-                <text><![CDATA[Adicional]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="633" y="0" width="169" height="14"/>
-                <textElement textAlignment="Right"/>
-                <text><![CDATA[Valor]]></text>
-            </staticText>
-        </band>
-    </columnHeader>
-    <detail>
-        <band height="14">
-            <textField>
-                <reportElement x="0" y="0" width="28" height="14"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                <textFieldExpression><![CDATA[$V{SEQ}]]></textFieldExpression>
-            </textField>
-            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                <reportElement x="28" y="0" width="135" height="14"/>
-                <textFieldExpression><![CDATA[$F{nm_cliente}]]></textFieldExpression>
-            </textField>
-            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                <reportElement x="163" y="0" width="125" height="14"/>
-                <textFieldExpression><![CDATA[$F{nm_propriedadecliente}]]></textFieldExpression>
-            </textField>
-            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                <reportElement x="288" y="0" width="115" height="14"/>
-                <textFieldExpression><![CDATA[$F{nm_tecnico}]]></textFieldExpression>
-            </textField>
-            <textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
-                <reportElement x="403" y="0" width="70" height="14"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                <textFieldExpression><![CDATA[$F{dt_visita}]]></textFieldExpression>
-            </textField>
-            <textField isBlankWhenNull="true">
-                <reportElement x="473" y="0" width="62" height="14"/>
-                <textFieldExpression><![CDATA[$F{tp_statusvisita}]]></textFieldExpression>
-            </textField>
-            <textField pattern="#,##0.00" isBlankWhenNull="true">
-                <reportElement x="535" y="0" width="98" height="14"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle"/>
-                <textFieldExpression><![CDATA[$F{vl_adicionalvisita}]]></textFieldExpression>
-            </textField>
-            <textField pattern="#,##0.00" isBlankWhenNull="true">
-                <reportElement x="633" y="0" width="169" height="14"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle"/>
-                <textFieldExpression><![CDATA[$F{vl_visitafinal}]]></textFieldExpression>
-            </textField>
-        </band>
-    </detail>
-    <pageFooter>
-        <band height="16">
-            <textField>
-                <reportElement x="676" y="2" width="70" height="12"/>
-                <textElement textAlignment="Right"/>
-                <textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
-            </textField>
-            <textField evaluationTime="Report">
-                <reportElement x="748" y="2" width="54" height="12"/>
-                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
-            </textField>
-        </band>
-    </pageFooter>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="relacao-visitas" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="12" bottomMargin="16" uuid="e8d406ef-43b2-401a-bf8d-3192ede4e3a6">
+	<style name="ContabilTitulo" forecolor="#1B2A41" fontName="SansSerif" fontSize="9" isBold="true"/>
+	<style name="ContabilLabel" forecolor="#666666" fontName="SansSerif" fontSize="7"/>
+	<style name="ContabilTexto" forecolor="#000000" fontName="SansSerif" fontSize="7"/>
+	<style name="ContabilTextoNegrito" forecolor="#000000" fontName="SansSerif" fontSize="7" isBold="true"/>
+	<style name="ContabilColumnHeader" mode="Opaque" forecolor="#000000" backcolor="#FFFFFF" fontName="SansSerif" fontSize="7" isBold="true">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.25" lineColor="#999999"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.25" lineColor="#999999"/>
+		</box>
+	</style>
+	<style name="ContabilDetail" mode="Opaque" forecolor="#000000" backcolor="#FFFFFF" fontName="SansSerif" fontSize="7">
+		<box>
+			<leftPen lineWidth="0.25" lineColor="#CCCCCC"/>
+			<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+			<rightPen lineWidth="0.25" lineColor="#CCCCCC"/>
+		</box>
+	</style>
+	<style name="ContabilDetailAlt" mode="Opaque" forecolor="#000000" backcolor="#FAFAFA" fontName="SansSerif" fontSize="7">
+		<box>
+			<leftPen lineWidth="0.25" lineColor="#CCCCCC"/>
+			<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+			<rightPen lineWidth="0.25" lineColor="#CCCCCC"/>
+		</box>
+	</style>
+	<style name="ContabilMonetario" mode="Opaque" forecolor="#000000" backcolor="#FFFFFF" fontName="SansSerif" fontSize="7">
+		<box>
+			<leftPen lineWidth="0.25" lineColor="#CCCCCC"/>
+			<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+			<rightPen lineWidth="0.25" lineColor="#CCCCCC"/>
+		</box>
+	</style>
+	<style name="ContabilMonetarioAlt" mode="Opaque" forecolor="#000000" backcolor="#FAFAFA" fontName="SansSerif" fontSize="7">
+		<box>
+			<leftPen lineWidth="0.25" lineColor="#CCCCCC"/>
+			<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+			<rightPen lineWidth="0.25" lineColor="#CCCCCC"/>
+		</box>
+	</style>
+	<style name="ContabilTotal" mode="Opaque" forecolor="#000000" backcolor="#FFFFFF" fontName="SansSerif" fontSize="7" isBold="true">
+		<box>
+			<topPen lineWidth="0.75" lineColor="#000000"/>
+			<bottomPen lineWidth="0.75" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="ContabilDetailZebra" style="ContabilDetail">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{SEQ} % 2 == 0]]></conditionExpression>
+			<style style="ContabilDetailAlt"/>
+		</conditionalStyle>
+	</style>
+	<style name="ContabilMonetarioZebra" style="ContabilMonetario">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{SEQ} % 2 == 0]]></conditionExpression>
+			<style style="ContabilMonetarioAlt"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="dataInicial" class="java.lang.String"/>
+	<parameter name="dataFinal" class="java.lang.String"/>
+	<parameter name="idProjeto" class="java.lang.Long"/>
+	<parameter name="idTecnico" class="java.lang.Long"/>
+	<parameter name="USUARIO_EMISSAO" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Sistema"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EMPRESA_RAZAO_SOCIAL" class="java.lang.String">
+		<defaultValueExpression><![CDATA["AGROTECH ASSESSORIA E CONSULTORIA RURAL LTDA"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EMPRESA_NOME_FANTASIA" class="java.lang.String">
+		<defaultValueExpression><![CDATA["AGROTECH"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EMPRESA_CNPJ" class="java.lang.String">
+		<defaultValueExpression><![CDATA["15.272.158/0001-98"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EMPRESA_ENDERECO" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Centro - Presidente Tancredo Neves - BA"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EMPRESA_CIDADE_UF" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Presidente Tancredo Neves/BA - CEP 45416-000"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EMPRESA_TELEFONE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["(73) 98214-2888"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EMPRESA_EMAIL" class="java.lang.String">
+		<defaultValueExpression><![CDATA["projetos@agrotechcredito.com.br"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="totalizador_quantidade" class="java.lang.Long"/>
+	<parameter name="totalizador_total_visita" class="java.lang.Double"/>
+	<parameter name="totalizador_total_adicional" class="java.lang.Double"/>
+	<parameter name="totalizador_valor_medio" class="java.lang.Double"/>
+	<parameter name="totalizador_valor_medioadicional" class="java.lang.Double"/>
+	<field name="nm_cliente" class="java.lang.String"/>
+	<field name="nm_propriedadecliente" class="java.lang.String"/>
+	<field name="nm_tecnico" class="java.lang.String"/>
+	<field name="vl_visitafinal" class="java.lang.Double"/>
+	<field name="vl_adicionalvisita" class="java.lang.Double"/>
+	<field name="dt_visita" class="java.sql.Date"/>
+	<field name="tp_statusvisita" class="java.lang.String"/>
+	<variable name="SEQ" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[1]]></variableExpression>
+	</variable>
+	<variable name="PERIODO_RELATORIO" class="java.lang.String">
+		<variableExpression><![CDATA[($P{dataInicial} == null || $P{dataInicial}.trim().isEmpty()) && ($P{dataFinal} == null || $P{dataFinal}.trim().isEmpty())
+                ? "Todo o período"
+                : (
+                    ($P{dataInicial} != null && !$P{dataInicial}.trim().isEmpty() && $P{dataFinal} != null && !$P{dataFinal}.trim().isEmpty())
+                        ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.text.SimpleDateFormat("yyyy-MM-dd").parse($P{dataInicial}.substring(0, 10)))
+                          + " a "
+                          + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.text.SimpleDateFormat("yyyy-MM-dd").parse($P{dataFinal}.substring(0, 10)))
+                        : (
+                            ($P{dataInicial} != null && !$P{dataInicial}.trim().isEmpty())
+                                ? "A partir de " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.text.SimpleDateFormat("yyyy-MM-dd").parse($P{dataInicial}.substring(0, 10)))
+                                : "Até " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.text.SimpleDateFormat("yyyy-MM-dd").parse($P{dataFinal}.substring(0, 10)))
+                          )
+                  )]]></variableExpression>
+	</variable>
+	<variable name="FILTROS_APLICADOS" class="java.lang.String">
+		<variableExpression><![CDATA[($P{idTecnico} == null && $P{idProjeto} == null)
+                ? "Nenhum filtro adicional"
+                : ($P{idTecnico} != null ? "Técnico ID: " + $P{idTecnico} : "")
+                  + ($P{idTecnico} != null && $P{idProjeto} != null ? " | " : "")
+                  + ($P{idProjeto} != null ? "Projeto ID: " + $P{idProjeto} : "")]]></variableExpression>
+	</variable>
+	<title>
+		<band height="92" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTitulo" x="0" y="0" width="414" height="11" uuid="e4521007-709e-4a2b-8e4c-fad1118ae25f"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{EMPRESA_RAZAO_SOCIAL}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="0" y="12" width="414" height="10" uuid="43755351-638c-47ac-8fdc-021eef8256f1"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["Nome fantasia: " + $P{EMPRESA_NOME_FANTASIA}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="0" y="23" width="414" height="10" uuid="52f60f97-3c31-4d23-b7a2-acf3481df91d"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["CNPJ: " + $P{EMPRESA_CNPJ}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="0" y="34" width="414" height="10" uuid="5bc07a3a-45ab-47de-bacf-c8e2599ae0ae"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{EMPRESA_ENDERECO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="0" y="45" width="414" height="10" uuid="03f37f36-9e30-4ebb-9f87-590d5a5d6760"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{EMPRESA_CIDADE_UF}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="0" y="56" width="414" height="10" uuid="4aa705f9-ddde-460a-8d97-c57a1afa01f0"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["Tel.: " + $P{EMPRESA_TELEFONE} + "   E-mail: " + $P{EMPRESA_EMAIL}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="430" y="0" width="110" height="10" uuid="27058431-9578-4bbf-92e9-fdd6dfb79d56"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Data de emissão:]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="ContabilTexto" x="540" y="0" width="262" height="10" uuid="4ecda5b1-cf46-4be7-81a1-d41194b5df86"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="430" y="11" width="110" height="10" uuid="77a1742a-83d8-4d77-ac74-34a4933912d9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Hora:]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="ContabilTexto" x="540" y="11" width="262" height="10" uuid="5c2f4df0-77e2-4253-a158-1783fbc834c0"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="430" y="22" width="110" height="10" uuid="78ee70f4-dff2-42b6-a0d8-a493d7705ea2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Usuário:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="540" y="22" width="262" height="10" uuid="1de7bcec-1f78-4786-a1d0-dbbb69ac534a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{USUARIO_EMISSAO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="430" y="33" width="110" height="10" uuid="c6f7862b-8a04-411f-b716-23b6e7868660"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Relatório:]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="ContabilTextoNegrito" x="540" y="33" width="262" height="10" uuid="fdce974f-84a7-4d0a-ac27-1ee124285a3c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["Relação de Visitas"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="430" y="44" width="110" height="10" uuid="76461f2e-56e2-458a-81db-b5e44d84c793"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Página:]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="ContabilTexto" x="540" y="44" width="262" height="10" uuid="41e08f9d-afaa-4e7c-b187-63ee08bcc5ba"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[String.valueOf($V{PAGE_NUMBER})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="430" y="55" width="110" height="10" uuid="b7823356-4561-4c79-afac-325d20798e50"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Período:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="540" y="55" width="262" height="10" uuid="cccc656d-2097-44de-a757-407207e3b3d1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{PERIODO_RELATORIO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="430" y="66" width="110" height="10" uuid="fbf09de8-4b7c-4937-b699-1ed03204a8fa"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Filtros:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="540" y="66" width="262" height="10" uuid="fab343c7-8e90-4755-a19d-8f11bea2c144"/>
+				<textElement textAlignment="Right" verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$V{FILTROS_APLICADOS}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="90" width="802" height="1" uuid="9c1afb1b-5a19-413d-b3f2-bd0dfbfa4d6c"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#000000"/>
+				</graphicElement>
+			</line>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="14">
+			<staticText>
+				<reportElement style="ContabilColumnHeader" x="0" y="0" width="28" height="14" uuid="8250935d-5bde-4685-8043-4882f213ee6f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[#]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ContabilColumnHeader" x="28" y="0" width="135" height="14" uuid="c33ca620-3b72-481c-9593-c42ad6faed1b"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[Cliente]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ContabilColumnHeader" x="163" y="0" width="125" height="14" uuid="ac80ef5d-2e02-4663-a25b-6bba394e726c"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[Propriedade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ContabilColumnHeader" x="288" y="0" width="115" height="14" uuid="17f142e6-6786-4ce8-aa1a-975abae6b69a"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[Técnico]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ContabilColumnHeader" x="403" y="0" width="70" height="14" uuid="d8fa744d-8626-4ad5-b9cf-06c504fe5777"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Data visita]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ContabilColumnHeader" x="473" y="0" width="62" height="14" uuid="08ad5631-71f7-423c-a4e6-da2018ad430e"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ContabilColumnHeader" x="535" y="0" width="98" height="14" uuid="58efb700-9243-466a-b999-ed9a8f38f330"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="3"/>
+				</textElement>
+				<text><![CDATA[Adicional]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ContabilColumnHeader" x="633" y="0" width="169" height="14" uuid="eb369d63-adc9-4d32-bc8c-4f669879ee54"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="3"/>
+				</textElement>
+				<text><![CDATA[Valor]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14">
+			<textField>
+				<reportElement style="ContabilDetailZebra" x="0" y="0" width="28" height="14" uuid="57c37ade-9540-4481-a9aa-b552bfa0ad12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{SEQ}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="ContabilDetailZebra" x="28" y="0" width="135" height="14" uuid="c58ec2f9-1da9-47e5-85eb-3c6c2c4e7945"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nm_cliente}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="ContabilDetailZebra" x="163" y="0" width="125" height="14" uuid="691beea7-a226-4c8c-8a7d-cc245fe01ee5"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nm_propriedadecliente}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="ContabilDetailZebra" x="288" y="0" width="115" height="14" uuid="10c407dc-7dd7-4aab-a232-72511a0687af"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nm_tecnico}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement style="ContabilDetailZebra" x="403" y="0" width="70" height="14" uuid="355858c4-d4ab-44c2-a408-4b34c2fe03e6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{dt_visita}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilDetailZebra" x="473" y="0" width="62" height="14" uuid="c23de59c-9bb2-4447-92c0-c040604682c1"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tp_statusvisita}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="ContabilMonetarioZebra" x="535" y="0" width="98" height="14" uuid="1ce3c563-b4b7-47b3-831b-bed3415f2429"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{vl_adicionalvisita}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="ContabilMonetarioZebra" x="633" y="0" width="169" height="14" uuid="16c64e8a-dc2e-44cc-95a1-35563ac0dfff"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{vl_visitafinal}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="16">
+			<line>
+				<reportElement x="0" y="0" width="802" height="1" uuid="2fa49ba7-4083-43fb-a376-152c44d5dd16"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#000000"/>
+				</graphicElement>
+			</line>
+			<textField isBlankWhenNull="true">
+				<reportElement style="ContabilTexto" x="0" y="2" width="240" height="12" uuid="f8222132-749c-494e-9ff5-33c1005742f8"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{EMPRESA_NOME_FANTASIA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="240" y="2" width="322" height="12" uuid="2cabbf66-66a5-477d-b6c5-c7d7f0095fc4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Relatório emitido automaticamente pelo sistema]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="ContabilTexto" x="676" y="2" width="70" height="12" uuid="7a1c4d28-75a4-41ca-85ce-318703e50fd0"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement style="ContabilTexto" x="748" y="2" width="54" height="12" uuid="414db87f-13b8-4974-861d-5f4802ba07fc"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42">
+			<staticText>
+				<reportElement style="ContabilTotal" x="0" y="0" width="802" height="14" uuid="b52c6d1f-a400-4160-b3f4-145c574ed5f3"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[TOTAIS GERAIS DO RELATÓRIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ContabilLabel" x="0" y="14" width="120" height="14" uuid="5981b2cf-b56f-4c26-9146-6e2308939f98"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[Quantidade de registros:]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="ContabilTextoNegrito" x="120" y="14" width="60" height="14" uuid="7e879b5b-b10e-4be8-b095-e52ebc683bbf"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{totalizador_quantidade}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="220" y="14" width="90" height="14" uuid="deebffa4-5307-4ed0-84e2-632ac5aa020c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Total visitas:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement style="ContabilMonetario" x="310" y="14" width="110" height="14" uuid="129b6340-eae6-4434-9d58-db3d0b8a9b4b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalizador_total_visita}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="440" y="14" width="100" height="14" uuid="a1a1a1a1-a1a1-4a1a-8a1a-a1a1a1a1a1a1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Total adicional:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement style="ContabilMonetario" x="540" y="14" width="110" height="14" uuid="a2a2a2a2-a2a2-4a2a-8a2a-a2a2a2a2a2a2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalizador_total_adicional}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="0" y="28" width="100" height="14" uuid="a3a3a3a3-a3a3-4a3a-8a3a-a3a3a3a3a3a3"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[Valor médio visita:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement style="ContabilMonetario" x="100" y="28" width="100" height="14" uuid="a4a4a4a4-a4a4-4a4a-8a4a-a4a4a4a4a4a4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalizador_valor_medio}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="ContabilLabel" x="540" y="28" width="110" height="14" uuid="a5a5a5a5-a5a5-4a5a-8a5a-a5a5a5a5a5a5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Adicional médio:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement style="ContabilMonetario" x="650" y="28" width="152" height="14" uuid="a6a6a6a6-a6a6-4a6a-8a6a-a6a6a6a6a6a6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalizador_valor_medioadicional}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
 </jasperReport>

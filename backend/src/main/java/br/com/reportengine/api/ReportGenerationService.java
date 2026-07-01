@@ -61,7 +61,9 @@ public class ReportGenerationService {
                     filtros
             );
 
-            Map<String, Object> jasperParams = toJasperParameters(filtros);
+            Map<String, Object> jasperParams = toJasperParameters(filtros, nmSolicitante);
+            jasperParams.putAll(executeAuxiliaryQueries(relatorio, filtros));
+
             byte[] content = jasperReportService.render(
                     template.getDsCaminho(),
                     jasperParams,
@@ -81,7 +83,7 @@ public class ReportGenerationService {
         }
     }
 
-    private Map<String, Object> toJasperParameters(Map<String, Object> filtros) {
+    private Map<String, Object> toJasperParameters(Map<String, Object> filtros, String nmSolicitante) {
         Map<String, Object> params = new HashMap<>();
         filtros.forEach((key, value) -> {
             if (value instanceof LocalDate date) {
@@ -90,6 +92,38 @@ public class ReportGenerationService {
                 params.put(key, value);
             }
         });
+        if (nmSolicitante != null && !nmSolicitante.isBlank()) {
+            params.put("USUARIO_EMISSAO", nmSolicitante);
+        }
+        return params;
+    }
+
+    /**
+     * Queries ativas com nmQuery diferente de "main" sao executadas e cada coluna
+     * do primeiro registro vira parametro Jasper: {nmQuery}_{nmColuna}.
+     */
+    private Map<String, Object> executeAuxiliaryQueries(
+            ReportDefinitionEntity relatorio,
+            Map<String, Object> filtros
+    ) {
+        Map<String, Object> params = new HashMap<>();
+        for (ReportQueryEntity query : relatorio.getQueries()) {
+            if (!query.isFlAtivo() || "main".equalsIgnoreCase(query.getNmQuery())) {
+                continue;
+            }
+            QueryExecutorService.QueryExecutionResult result = queryExecutorService.execute(
+                    relatorio.getNmDatasource(),
+                    query.getDsSql(),
+                    filtros
+            );
+            if (result.rows().isEmpty()) {
+                continue;
+            }
+            String prefix = query.getNmQuery() + "_";
+            result.rows().get(0).forEach((column, value) ->
+                    params.put(prefix + column, value)
+            );
+        }
         return params;
     }
 

@@ -54,12 +54,44 @@
 
   @if (!isNew) {
     <div class="card">
-      <h3>Query principal</h3>
+      <h3>Queries SQL</h3>
+      <p class="hint">
+        Use <code>main</code> para o detalhe. Outras queries (ex.: <code>totalizador</code>) viram
+        parâmetros no JRXML: <code>{nmQuery}_{coluna}</code> (ex.: <code>totalizador_quantidade</code>).
+      </p>
+
+      @if (detail?.queries?.length) {
+        <table style="margin-bottom: 16px">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Ativa</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (query of detail!.queries; track query.nmQuery) {
+              <tr>
+                <td>{{ query.nmQuery }}</td>
+                <td>{{ query.flAtivo ? 'Sim' : 'Nao' }}</td>
+                <td>
+                  <button type="button" (click)="editQuery(query)">Editar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      <div style="margin-bottom: 12px">
+        <button type="button" (click)="newQuery()">Nova query</button>
+      </div>
+
       <form [formGroup]="queryForm" (ngSubmit)="saveQuery()">
         <div class="grid-2">
           <div>
             <label for="nmQuery">Nome</label>
-            <input id="nmQuery" formControlName="nmQuery" />
+            <input id="nmQuery" formControlName="nmQuery" placeholder="main, totalizador..." />
           </div>
           <div>
             <label for="flAtivoQuery">Ativa</label>
@@ -71,7 +103,7 @@
         </div>
         <div style="margin-top: 12px">
           <label for="dsSql">SQL</label>
-          <textarea id="dsSql" rows="8" formControlName="dsSql"></textarea>
+          <textarea id="dsSql" rows="10" formControlName="dsSql"></textarea>
         </div>
         <div style="margin-top: 12px">
           <button type="submit" [disabled]="queryForm.invalid">Salvar query</button>

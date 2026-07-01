@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReportAdminApi } from '../../services/report-admin.api';
-import { ReportDetail } from '../../models/report.models';
+import { ReportDetail, ReportQuery } from '../../models/report.models';
 
 @Component({
   selector: 'app-report-form-page',
@@ -72,7 +72,7 @@ export class ReportFormPage implements OnInit {
           });
           const mainQuery = detail.queries.find((q) => q.nmQuery === 'main');
           if (mainQuery) {
-            this.queryForm.patchValue(mainQuery);
+            this.editQuery(mainQuery);
           }
           this.loading = false;
         },
@@ -122,10 +122,32 @@ export class ReportFormPage implements OnInit {
       next: (detail) => {
         this.detail = detail;
         this.message = 'Query salva com sucesso';
+        const saved = detail.queries.find(
+          (q) => q.nmQuery === this.queryForm.getRawValue().nmQuery
+        );
+        if (saved) {
+          this.editQuery(saved);
+        }
       },
       error: (err) => {
         this.error = err?.error?.detail ?? 'Falha ao salvar query';
       },
+    });
+  }
+
+  editQuery(query: ReportQuery): void {
+    this.queryForm.patchValue({
+      nmQuery: query.nmQuery,
+      dsSql: query.dsSql,
+      flAtivo: query.flAtivo,
+    });
+  }
+
+  newQuery(): void {
+    this.queryForm.reset({
+      nmQuery: '',
+      dsSql: '',
+      flAtivo: true,
     });
   }
 
