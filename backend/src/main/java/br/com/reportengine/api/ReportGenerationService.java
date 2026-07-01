@@ -15,10 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +32,7 @@ public class ReportGenerationService {
     private final QueryExecutorService queryExecutorService;
     private final JasperReportService jasperReportService;
     private final ObjectMapper objectMapper;
+    private final ReportJasperParameterBuilder jasperParameterBuilder;
 
     @Transactional
     public GeneratedReport generate(String cdRelatorio, GenerateReportRequest request, String nmSolicitante) {
@@ -74,7 +73,7 @@ public class ReportGenerationService {
                     filtros
             );
 
-            Map<String, Object> jasperParams = toJasperParameters(filtros, nmSolicitante);
+            Map<String, Object> jasperParams = jasperParameterBuilder.build(relatorio, filtros, nmSolicitante);
             List<Map<String, Object>> rows = mergeAuxiliaryFieldsIntoRows(
                     relatorio,
                     filtros,
@@ -98,34 +97,6 @@ public class ReportGenerationService {
                     System.currentTimeMillis() - startedAt, false, ex.getMessage(), nmSolicitante);
             throw ex;
         }
-    }
-
-    private Map<String, Object> toJasperParameters(Map<String, Object> filtros, String nmSolicitante) {
-        Map<String, Object> params = new HashMap<>();
-        filtros.forEach((key, value) -> {
-            if (value instanceof LocalDate date) {
-                params.put(key, date.toString());
-            } else if (value instanceof Number number) {
-                params.put(key, toJasperNumber(number));
-            } else {
-                params.put(key, value);
-            }
-        });
-        if (nmSolicitante != null && !nmSolicitante.isBlank()) {
-            params.put("USUARIO_EMISSAO", nmSolicitante);
-        }
-        return params;
-    }
-
-    private Object toJasperNumber(Number number) {
-        if (number instanceof Double || number instanceof Float) {
-            double d = number.doubleValue();
-            if (d == Math.rint(d) && d >= Long.MIN_VALUE && d <= Long.MAX_VALUE) {
-                return (long) d;
-            }
-            return d;
-        }
-        return number.longValue();
     }
 
     /**

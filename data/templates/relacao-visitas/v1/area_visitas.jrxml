@@ -59,13 +59,11 @@
 			<style/>
 		</conditionalStyle>
 	</style>
-	<parameter name="dataInicial" class="java.lang.String"/>
-	<parameter name="dataFinal" class="java.lang.String"/>
-	<parameter name="idProjeto" class="java.lang.Long">
-		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	<parameter name="PERIODO_RELATORIO" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Todo o período"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="idTecnico" class="java.lang.Long">
-		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	<parameter name="FILTROS_APLICADOS" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Nenhum filtro adicional"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="USUARIO_EMISSAO" class="java.lang.String">
 		<defaultValueExpression><![CDATA["Sistema"]]></defaultValueExpression>
@@ -108,28 +106,6 @@
 	<field name="valor_medioadicional" class="java.lang.Double"/>
 	<variable name="SEQ" class="java.lang.Integer" calculation="Count">
 		<variableExpression><![CDATA[1]]></variableExpression>
-	</variable>
-	<variable name="PERIODO_RELATORIO" class="java.lang.String">
-		<variableExpression><![CDATA[($P{dataInicial} == null || $P{dataInicial}.trim().isEmpty()) && ($P{dataFinal} == null || $P{dataFinal}.trim().isEmpty())
-                ? "Todo o período"
-                : (
-                    ($P{dataInicial} != null && !$P{dataInicial}.trim().isEmpty() && $P{dataFinal} != null && !$P{dataFinal}.trim().isEmpty())
-                        ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.text.SimpleDateFormat("yyyy-MM-dd").parse($P{dataInicial}.substring(0, 10)))
-                          + " a "
-                          + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.text.SimpleDateFormat("yyyy-MM-dd").parse($P{dataFinal}.substring(0, 10)))
-                        : (
-                            ($P{dataInicial} != null && !$P{dataInicial}.trim().isEmpty())
-                                ? "A partir de " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.text.SimpleDateFormat("yyyy-MM-dd").parse($P{dataInicial}.substring(0, 10)))
-                                : "Até " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.text.SimpleDateFormat("yyyy-MM-dd").parse($P{dataFinal}.substring(0, 10)))
-                          )
-                  )]]></variableExpression>
-	</variable>
-	<variable name="FILTROS_APLICADOS" class="java.lang.String">
-		<variableExpression><![CDATA[($P{idTecnico} == null && $P{idProjeto} == null)
-                ? "Nenhum filtro adicional"
-                : ($P{idTecnico} != null ? "Técnico ID: " + String.valueOf($P{idTecnico}) : "")
-                  + ($P{idTecnico} != null && $P{idProjeto} != null ? " | " : "")
-                  + ($P{idProjeto} != null ? "Projeto ID: " + String.valueOf($P{idProjeto}) : "")]]></variableExpression>
 	</variable>
 	<title>
 		<band height="92" splitType="Stretch">
@@ -221,7 +197,7 @@
 			<textField isBlankWhenNull="true">
 				<reportElement style="ContabilTexto" x="540" y="55" width="262" height="10" uuid="cccc656d-2097-44de-a757-407207e3b3d1"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$V{PERIODO_RELATORIO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{PERIODO_RELATORIO}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement style="ContabilLabel" x="430" y="66" width="110" height="10" uuid="fbf09de8-4b7c-4937-b699-1ed03204a8fa"/>
@@ -231,7 +207,7 @@
 			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
 				<reportElement style="ContabilTexto" x="540" y="66" width="262" height="10" uuid="fab343c7-8e90-4755-a19d-8f11bea2c144"/>
 				<textElement textAlignment="Right" verticalAlignment="Top"/>
-				<textFieldExpression><![CDATA[$V{FILTROS_APLICADOS}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{FILTROS_APLICADOS}]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="0" y="90" width="802" height="1" uuid="9c1afb1b-5a19-413d-b3f2-bd0dfbfa4d6c"/>

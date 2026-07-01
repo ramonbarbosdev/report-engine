@@ -29,7 +29,7 @@ public class QueryExecutorService {
         }
 
         NamedParameterJdbcTemplate jdbc = new NamedParameterJdbcTemplate(dataSource);
-        Map<String, Object> safeParams = parameters == null ? Map.of() : parameters;
+        Map<String, Object> safeParams = sanitizeParameters(parameters);
 
         List<Map<String, Object>> rows = jdbc.query(
                 sql + " LIMIT " + properties.getMaxRows(),
@@ -45,6 +45,21 @@ public class QueryExecutorService {
         );
 
         return new QueryExecutionResult(new ArrayList<>(rows), rows.size());
+    }
+
+    private Map<String, Object> sanitizeParameters(Map<String, Object> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, Object> safe = new LinkedHashMap<>();
+        parameters.forEach((key, value) -> {
+            if (value instanceof String text && text.isBlank()) {
+                safe.put(key, null);
+            } else {
+                safe.put(key, value);
+            }
+        });
+        return safe;
     }
 
     public record QueryExecutionResult(List<Map<String, Object>> rows, int nuLinhas) {
